@@ -127,14 +127,6 @@ User information is stored in `Key.json` file in array format:
 
 To view all registered users, use the helper script:
 
-```bash
-./view_all_users.sh
-```
-
-Or manually view the file:
-
-```bash
-cat Key.json
 ```
 
 For Android devices, pull the file:
