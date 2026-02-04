@@ -41,7 +41,28 @@ String formatDurationShort(int sec) {
   int mins = (sec % 3600) ~/ 60;
 
   if (hours == 0) {
-    return "${mins}m";
+    return "${mins} min";
   }
-  return "${hours}h ${mins}m";
+  return "${hours}h ${mins} min";
+}
+
+String formatArrivalTime(DateTime dt) {
+  int hour = dt.hour;
+  int minute = dt.minute;
+  String period = hour >= 12 ? "P.M." : "A.M.";
+  
+  if (hour == 0) {
+    hour = 12;
+  } else if (hour > 12) {
+    hour = hour - 12;
+  }
+  
+  return "$hour:${minute.toString().padLeft(2, '0')} $period";
+}
+
+String formatDistanceShort(int meters) {
+  if (meters < 1000) {
+    return "${meters} M";
+  }
+  return "${(meters / 1000).toStringAsFixed(1)} km";
 }

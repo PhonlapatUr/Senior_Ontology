@@ -10,11 +10,21 @@ class BackendService {
   Future<Map<int, SafeScore>> scoreRoutes({
     required List<RouteRequestItem> routes,
     required int sampleStride,
+    List<String>? focusPollutants,
+    bool useOntology = false,
   }) async {
     final body = {
       "routes": routes.map((e) => e.toJson()).toList(),
       "sample_stride": sampleStride,
     };
+    
+    if (focusPollutants != null && focusPollutants.isNotEmpty) {
+      body["focus_pollutants"] = focusPollutants;
+    }
+    
+    if (useOntology) {
+      body["use_ontology"] = true;
+    }
 
     final res = await http.post(
       Uri.parse("$baseUrl/scoreRoutes"),
