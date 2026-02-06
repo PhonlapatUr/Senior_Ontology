@@ -124,6 +124,7 @@ class DetailCard extends StatelessWidget {
                 child: Text(
                   "Value",
                   style: TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Padding(
@@ -139,7 +140,7 @@ class DetailCard extends StatelessWidget {
                 child: Text(
                   "Normalized",
                   style: TextStyle(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ],
@@ -161,6 +162,7 @@ class DetailCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Text(
             label,
+            textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14),
           ),
         ),
@@ -179,7 +181,7 @@ class DetailCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Text(
             value.toStringAsFixed(3),
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,

@@ -288,8 +288,8 @@ class DSSCalculationScreen extends StatelessWidget {
                       child: Table(
                         columnWidths: const {
                           0: FlexColumnWidth(2),
-                          1: FlexColumnWidth(1.5),
-                          2: FlexColumnWidth(1.5),
+                          1: FlexColumnWidth(1.2),
+                          2: FlexColumnWidth(2.2),
                         },
                         border: TableBorder.all(color: Colors.grey.shade300),
                         children: [
@@ -304,6 +304,7 @@ class DSSCalculationScreen extends StatelessWidget {
                                 child: Text(
                                   "Value",
                                   style: TextStyle(fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                               Padding(
@@ -315,11 +316,15 @@ class DSSCalculationScreen extends StatelessWidget {
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsets.all(12),
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                                 child: Text(
                                   "Normalized",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 6,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.visible,
                                 ),
                               ),
                             ],
@@ -475,7 +480,10 @@ class DSSCalculationScreen extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(12),
-          child: Text(label),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+          ),
         ),
         const Padding(
           padding: EdgeInsets.all(12),
@@ -486,10 +494,10 @@ class DSSCalculationScreen extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           child: Text(
             value.toStringAsFixed(3),
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.center,
           ),
         ),
       ],

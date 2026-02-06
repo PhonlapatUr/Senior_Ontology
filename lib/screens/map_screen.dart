@@ -18,6 +18,9 @@ import '../widgets/dss_calculation_screen.dart';
 import '../widgets/preview_card.dart';
 import '../widgets/nav_overlay.dart';
 
+// screens
+import 'login_screen.dart';
+
 // models
 import '../models/travel_time.dart';
 import '../models/route_info.dart';
@@ -33,6 +36,7 @@ import '../services/google_routes_service.dart';
 import '../services/geocode_service.dart';
 import '../services/backend_service.dart';
 import '../services/ontology_service.dart';
+import '../services/auth_service.dart';
 
 // CONFIG --------------------------------------------------------------
 
@@ -86,6 +90,7 @@ class _MapScreenState extends State<MapScreen> {
   late final GoogleRoutesService gRoutes = GoogleRoutesService(googleApiKey);
   late final GeocodeService geocoder = GeocodeService(googleApiKey);
   late final BackendService backend = BackendService(backendBase());
+  final AuthService _authService = AuthService();
 
   // INIT --------------------------------------------------------------
 
@@ -496,6 +501,98 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  // SIGN OUT ---------------------------------------------------------
+
+  // Show sign out confirmation dialog
+  void _showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.logout, color: Colors.red, size: 28),
+              SizedBox(width: 12),
+              Text(
+                "Sign Out?",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            "Are you sure you want to sign out?",
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(
+                "Cancel",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await _handleSignOut(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text(
+                "Sign Out",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Handle sign out
+  Future<void> _handleSignOut(BuildContext context) async {
+    try {
+      print('👋 User signed out');
+      
+      // Navigate to login page
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false, // Remove all previous routes
+        );
+      }
+    } catch (e) {
+      print('Error signing out: $e');
+      // Still navigate to login even if there's an error
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
   // MODE SELECTOR -----------------------------------------------------
 
   Widget _buildModeSelector() {
@@ -554,7 +651,17 @@ class _MapScreenState extends State<MapScreen> {
         : chosenRoute.clamp(0, routes.length - 1);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Smart Route Finder")),
+      appBar: AppBar(
+        title: const Text("Smart Route Finder"),
+        automaticallyImplyLeading: false, // Remove back arrow icon
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign Out',
+            onPressed: () => _showSignOutDialog(context),
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           GoogleMap(
