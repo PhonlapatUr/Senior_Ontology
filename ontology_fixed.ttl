@@ -1,0 +1,166 @@
+@prefix : <http://www.example.org/airpollution#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.example.org/airpollution#> .
+
+<http://www.example.org/airpollution/> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.example.org/airpollution#hasComponent
+:hasComponent rdf:type owl:ObjectProperty ;
+              rdfs:domain :Pollutant ;
+              rdfs:range :Pollutant .
+
+###  http://www.example.org/airpollution#hasPrecursor
+:hasPrecursor rdf:type owl:ObjectProperty ;
+              rdfs:domain :Pollutant ;
+              rdfs:range :Pollutant .
+
+###  http://www.example.org/airpollution#hasSource
+:hasSource rdf:type owl:ObjectProperty ;
+           rdfs:domain :Pollutant ;
+           rdfs:range :Source .
+
+#################################################################
+#    Main Classes
+#################################################################
+
+###  http://www.example.org/airpollution#Pollutant
+:Pollutant rdf:type owl:Class .
+
+###  http://www.example.org/airpollution#Source
+:Source rdf:type owl:Class .
+
+###  http://www.example.org/airpollution#HumanSources
+:HumanSources rdf:type owl:Class ;
+              rdfs:subClassOf :Source .
+
+###  http://www.example.org/airpollution#NaturalSources
+:NaturalSources rdf:type owl:Class ;
+                rdfs:subClassOf :Source .
+
+###  http://www.example.org/airpollution#PM
+:PM rdf:type owl:Class ;
+    rdfs:subClassOf :Pollutant .
+
+#################################################################
+#    Source Classes (Converted from Individuals)
+#################################################################
+
+:AgriculturalActivities rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:Biogenic rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:BurningBiomass rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:BurningFossilFuels rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:ChlorophyllDecomposition rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:CombustionEngines rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:ConstructionActivities rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:DieselVehicles rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:DustStorm rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:ElectricDischarges rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:EvaporatedFuels rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:ForestFires rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:FuelBurningHighTemp rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:FuelCombustion rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:Fungi rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:Furnace rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:GasToParticle rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:IncompleteCombustion rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:Metallurgy rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:PaperMaking rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:PetrochemicalSolvents rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:PetroleumRefineries rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:Pollen rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:RoadDust rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:RoadTransportation rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:SeaSalt rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:Smelts rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:Spores rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:StreetDust rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:ThermoelectricPlants rdf:type owl:Class ; rdfs:subClassOf :HumanSources .
+:VolcanicActivity rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:VolcanicAsh rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:VolcanicEruptions rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+:WindblowSoil rdf:type owl:Class ; rdfs:subClassOf :NaturalSources .
+
+#################################################################
+#    Pollutant Classes (Converted & Linked with Rules)
+#################################################################
+
+###  NOx and NO2 Hierarchy (The Fix)
+:NOx rdf:type owl:Class ;
+     rdfs:subClassOf :Pollutant ;
+     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :BurningFossilFuels ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :CombustionEngines ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :ElectricDischarges ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :FuelBurningHighTemp ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :NitricAcid ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :SulfuricAcid ] .
+
+:NO2 rdf:type owl:Class ;
+     rdfs:subClassOf :NOx .
+
+###  Other Pollutants
+:CO rdf:type owl:Class ;
+    rdfs:subClassOf :Pollutant ;
+    rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :BurningBiomass ] ,
+                    [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :BurningFossilFuels ] ,
+                    [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :ChlorophyllDecomposition ] ,
+                    [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :ForestFires ] ,
+                    [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :IncompleteCombustion ] ,
+                    [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :RoadTransportation ] ,
+                    [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :VolcanicEruptions ] .
+
+:NitricAcid rdf:type owl:Class ;
+            rdfs:subClassOf :HumanSources .  # Note: You listed this as a Source in your original file
+
+:SulfuricAcid rdf:type owl:Class ;
+              rdfs:subClassOf :HumanSources . # Note: You listed this as a Source in your original file
+
+:O3 rdf:type owl:Class ;
+    rdfs:subClassOf :Pollutant ;
+    rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty :hasPrecursor ; owl:someValuesFrom :NOx ] ,
+                    [ rdf:type owl:Restriction ; owl:onProperty :hasPrecursor ; owl:someValuesFrom :VOCs ] .
+
+:VOCs rdf:type owl:Class ;
+      rdfs:subClassOf :Pollutant ;
+      rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :Biogenic ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :EvaporatedFuels ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :PetrochemicalSolvents ] .
+
+:SO2 rdf:type owl:Class ;
+     rdfs:subClassOf :Pollutant ;
+     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :DieselVehicles ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :FuelCombustion ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :Furnace ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :Metallurgy ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :PaperMaking ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :PetroleumRefineries ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :Smelts ] ,
+                     [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :VolcanicActivity ] .
+
+:PM10 rdf:type owl:Class ;
+      rdfs:subClassOf :PM ;
+      rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :AgriculturalActivities ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :ConstructionActivities ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :DustStorm ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :Fungi ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :Pollen ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :RoadDust ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :SeaSalt ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :Spores ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :StreetDust ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :VolcanicAsh ] ,
+                      [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :WindblowSoil ] .
+
+:PM2.5 rdf:type owl:Class ;
+       rdfs:subClassOf :PM ;
+       rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :BurningBiomass ] ,
+                       [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :BurningFossilFuels ] ,
+                       [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :GasToParticle ] ,
+                       [ rdf:type owl:Restriction ; owl:onProperty :hasSource ; owl:someValuesFrom :ThermoelectricPlants ] .
