@@ -74,6 +74,27 @@ flutter run
 
 For detailed running instructions, see [RUN_GUIDE.md](RUN_GUIDE.md).
 
+### Deploying so all users can use the app (any network)
+
+To run the server in one place and let everyone use the app from anywhere (not only same WiFi):
+
+1. **Deploy the backend** to a host with a public URL, for example:
+   - [Railway](https://railway.app): connect your repo, add a Python service, set start command `uvicorn server:app --host 0.0.0.0 --port $PORT`, add env vars `GOOGLE_API_KEY`, `TMD_TOKEN` if needed.
+   - [Render](https://render.com): New Web Service, build `pip install -r requirements.txt`, start `uvicorn server:app --host 0.0.0.0 --port $PORT`.
+   - Or any VPS/cloud VM: run the server and expose port 8000 (or use `PORT` env); use HTTPS in production (e.g. nginx + Let’s Encrypt).
+
+2. **Set the app’s backend URL** when building for production. Replace `https://your-app.railway.app` with your real server URL (no trailing slash):
+
+   ```bash
+   flutter build apk --dart-define=BACKEND_URL=https://your-app.railway.app
+   # or for iOS:
+   flutter build ios --dart-define=BACKEND_URL=https://your-app.railway.app
+   ```
+
+   For local/dev builds, omit `BACKEND_URL`; the app will keep using `127.0.0.1:8000` (or emulator URL).
+
+3. **HTTPS**: Use HTTPS for the server in production so the app can call it from any network. Free tiers on Railway/Render provide HTTPS by default.
+
 ## 👤 User Authentication
 
 ### Sign Up

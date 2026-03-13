@@ -296,19 +296,18 @@ async def score_routes(req: ScoreRequest):
                     {"distance": max_dist, "time": max_time},
                     critic_w, gmean, gstd, avg_p, w_scores, avg_h
                 )
-                
                 scores.append(ScoreResult(
                     id=r.id, risk_score=res["final_score"],
                     di=res["di"], dt=res["dt"], dp=res["dp"], dw=res["dw"],
                     avgHumidity=res["avg_humidity"], points_sampled=len(pts), 
                     points_used=len(p_rows), note="ok"
                 ))
-
         return ScoreResponse(scores=scores)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
