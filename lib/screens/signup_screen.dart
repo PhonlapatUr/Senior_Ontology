@@ -62,6 +62,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
       return;
     }
+    if (_passwordController.text != _confirmPasswordController.text) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password and Confirm Password do not match.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -205,6 +216,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         "Create Password",
                         _obscurePassword,
                         (v) => setState(() => _obscurePassword = v),
+                        isConfirmField: false,
                       ),
                       const SizedBox(height: 16),
                       _buildPasswordField(
@@ -212,6 +224,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         "Confirm Password",
                         _obscureConfirmPassword,
                         (v) => setState(() => _obscureConfirmPassword = v),
+                        isConfirmField: true,
                       ),
                       const SizedBox(height: 32),
                       _buildSignUpButton(),
@@ -254,6 +267,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String label,
     bool obscure,
     Function(bool) toggle,
+    {required bool isConfirmField}
   ) {
     return TextFormField(
       controller: controller,
@@ -266,8 +280,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
           onPressed: () => toggle(!obscure),
         ),
       ),
-      validator: (value) =>
-          (value == null || value.length < 6) ? 'Min 6 characters' : null,
+      validator: (value) {
+        if (value == null || value.length < 6) {
+          return 'Min 6 characters';
+        }
+        if (isConfirmField && value != _passwordController.text) {
+          return 'Passwords do not match';
+        }
+        return null;
+      },
     );
   }
 

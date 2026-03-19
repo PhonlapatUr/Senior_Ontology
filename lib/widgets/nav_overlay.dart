@@ -46,7 +46,7 @@ class NavOverlay extends StatelessWidget {
             : "Follow the route");
     final eta = DateTime.now().add(Duration(seconds: durationRemainingSec));
 
-    const teal = Color(0xFF26A69A);
+    const teal = Color(0xFF00796B);
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
     final padding = mq.padding;
@@ -69,7 +69,7 @@ class NavOverlay extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: teal,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.2),
@@ -105,7 +105,7 @@ class NavOverlay extends StatelessWidget {
         // RIGHT: Map controls – responsive inset
         // --------------------------------------------------
         Positioned(
-          top: padding.top + 80,
+          top: padding.top + 94,
           right: horizontalInset,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -121,7 +121,7 @@ class NavOverlay extends StatelessWidget {
               if (onZoomOut != null && onRouteOptionsTap != null) const SizedBox(height: 8),
               if (onRouteOptionsTap != null)
                 _MapControlButton(
-                  icon: Icons.compare_arrows,
+                  icon: Icons.alt_route,
                   onTap: onRouteOptionsTap!,
                 ),
             ],
@@ -144,7 +144,7 @@ class NavOverlay extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.82),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.3),
@@ -181,7 +181,7 @@ class NavOverlay extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Row(
                           children: [
                             Text(
@@ -212,7 +212,7 @@ class NavOverlay extends StatelessWidget {
                       onTap: onExit,
                       borderRadius: BorderRadius.circular(10),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         child: Text(
                           "Exit",
                           style: TextStyle(
@@ -234,16 +234,14 @@ class NavOverlay extends StatelessWidget {
                         onTap: onRecenter,
                         borderRadius: BorderRadius.circular(10),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.arrow_upward, color: Colors.white, size: 20),
                               const SizedBox(width: 6),
-                              const Text(
-                                "Re-center",
-                                style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
-                              ),
+                              const Text("Re-center",
+                                  style: TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500)),
                             ],
                           ),
                         ),
@@ -269,13 +267,13 @@ class _MapControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.grey.shade800,
-      borderRadius: BorderRadius.circular(8),
+      color: Colors.grey.shade900,
+      borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(11),
           child: Icon(icon, color: iconColor ?? Colors.white, size: 24),
         ),
       ),

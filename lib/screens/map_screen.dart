@@ -110,6 +110,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _isRecalculatingRoute = false;
   DateTime? _lastRecalcRouteAt;
   static const Duration _recalcCooldown = Duration(seconds: 15);
+  int _lastNavClosestIndex = 0;
 
   /// Route info panel: true = maximized (default), false = minimized to see map
   bool _routePanelExpanded = true;
@@ -170,6 +171,27 @@ class _MapScreenState extends State<MapScreen> {
       if (!mounted) return;
       final latLng = LatLng(position.latitude, position.longitude);
       setState(() => _navCurrentLocation = latLng);
+      if (step == FlowStep.nav && routes.isNotEmpty) {
+        _drawRoutesBasic();
+      }
+      // #region agent log
+      if (step == FlowStep.nav && routes.isNotEmpty) {
+        final navPoints = routes[chosenRoute.clamp(0, routes.length - 1)].points;
+        final idx = _closestRoutePointIndex(latLng, navPoints);
+        debugLog(
+          'map_screen.dart:_startPositionStream',
+          'position update',
+          runId: 'initial',
+          hypothesisId: 'H5',
+          data: {
+            'lat': position.latitude,
+            'lng': position.longitude,
+            'closestIdx': idx,
+            'routePoints': navPoints.length,
+          },
+        );
+      }
+      // #endregion
       mapCtrl?.animateCamera(
         CameraUpdate.newLatLngZoom(latLng, _navZoom),
       );
@@ -182,7 +204,32 @@ class _MapScreenState extends State<MapScreen> {
         final distToRoute = distanceToRoute(latLng, routePoints);
         final cooldownPassed = _lastRecalcRouteAt == null ||
             DateTime.now().difference(_lastRecalcRouteAt!) > _recalcCooldown;
+        // #region agent log
+        debugLog(
+          'map_screen.dart:_startPositionStream',
+          'off-route check',
+          runId: 'initial',
+          hypothesisId: 'H6',
+          data: {
+            'distToRouteMeters': distToRoute,
+            'thresholdMeters': _offRouteThresholdMeters,
+            'cooldownPassed': cooldownPassed,
+            'isRecalculating': _isRecalculatingRoute,
+          },
+        );
+        // #endregion
         if (distToRoute > _offRouteThresholdMeters && cooldownPassed) {
+          // #region agent log
+          debugLog(
+            'map_screen.dart:_startPositionStream',
+            'trigger auto-reroute',
+            runId: 'initial',
+            hypothesisId: 'H6',
+            data: {
+              'distToRouteMeters': distToRoute,
+            },
+          );
+          // #endregion
           _recalculateRouteFromCurrentLocation();
         }
       }
@@ -199,6 +246,19 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _recalculateRouteFromCurrentLocation() async {
     if (_isRecalculatingRoute || !mounted || dest == null || _navCurrentLocation == null) return;
     _isRecalculatingRoute = true;
+    // #region agent log
+    debugLog(
+      'map_screen.dart:_recalculateRouteFromCurrentLocation',
+      'reroute started',
+      runId: 'initial',
+      hypothesisId: 'H7',
+      data: {
+        'hasPollutionConcern': hasPollutionConcern,
+        'selectedPollutants': selectedPollutants.toList(),
+        'mode': selectedMode,
+      },
+    );
+    // #endregion
     if (mounted) setState(() => loading = true);
     try {
       final newRoutes = await gRoutes.getRoutes(
@@ -212,6 +272,17 @@ class _MapScreenState extends State<MapScreen> {
         chosenRoute = 0;
         origin = _navCurrentLocation;
       });
+      // #region agent log
+      debugLog(
+        'map_screen.dart:_recalculateRouteFromCurrentLocation',
+        'reroute fetched routes',
+        runId: 'initial',
+        hypothesisId: 'H7',
+        data: {
+          'newRouteCount': newRoutes.length,
+        },
+      );
+      // #endregion
       await _scoreAllRoutes();
       _lastRecalcRouteAt = DateTime.now();
       if (mounted) {
@@ -226,6 +297,15 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     } catch (e) {
+      // #region agent log
+      debugLog(
+        'map_screen.dart:_recalculateRouteFromCurrentLocation',
+        'reroute failed',
+        runId: 'initial',
+        hypothesisId: 'H7',
+        data: {'error': e.toString()},
+      );
+      // #endregion
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -267,6 +347,20 @@ class _MapScreenState extends State<MapScreen> {
     }
     if (!mounted) return;
     setState(() => step = FlowStep.nav);
+    _drawRoutesBasic();
+    // #region agent log
+    debugLog(
+      'map_screen.dart:_startNavigation',
+      'navigation started',
+      runId: 'initial',
+      hypothesisId: 'H4',
+      data: {
+        'originIsMyLocation': startCtrl.text == "My Location",
+        'chosenRoute': chosenRoute,
+        'routeCount': routes.length,
+      },
+    );
+    // #endregion
     mapCtrl?.animateCamera(
       CameraUpdate.newLatLngZoom(live, _navZoom),
     );
@@ -660,6 +754,21 @@ class _MapScreenState extends State<MapScreen> {
         useOntology =
             true; // Enable ontology-based adjustments for better scoring
       }
+      // #region agent log
+      debugLog(
+        'map_screen.dart:_scoreAllRoutes',
+        'score parameters',
+        runId: 'initial',
+        hypothesisId: 'H8',
+        data: {
+          'routeCount': routeItems.length,
+          'hasPollutionConcern': hasPollutionConcern,
+          'selectedPollutants': selectedPollutants.toList(),
+          'focusPollutants': focusPollutants ?? <String>[],
+          'useOntology': useOntology,
+        },
+      );
+      // #endregion
 
       // Call backend API to calculate DSS scores with selected pollutants
       print("Connecting to: $backendBase");
@@ -671,6 +780,17 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       routeScores = scores;
+      // #region agent log
+      debugLog(
+        'map_screen.dart:_scoreAllRoutes',
+        'score success',
+        runId: 'initial',
+        hypothesisId: 'H8',
+        data: {
+          'scoreCount': scores.length,
+        },
+      );
+      // #endregion
 
       _ensureScoreExists();
       _computeIndicators();
@@ -776,6 +896,25 @@ class _MapScreenState extends State<MapScreen> {
 
   // MAP RENDER --------------------------------------------------------
 
+  int _closestRoutePointIndex(LatLng location, List<LatLng> routePoints) {
+    if (routePoints.isEmpty) return 0;
+    double minDist = double.infinity;
+    int closestIdx = 0;
+    for (int i = 0; i < routePoints.length; i++) {
+      final d = Geolocator.distanceBetween(
+        location.latitude,
+        location.longitude,
+        routePoints[i].latitude,
+        routePoints[i].longitude,
+      );
+      if (d < minDist) {
+        minDist = d;
+        closestIdx = i;
+      }
+    }
+    return closestIdx;
+  }
+
   void _drawRoutesBasic() {
     if (routes.isEmpty) return;
 
@@ -807,22 +946,62 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
     // Thinner green route during navigation when user is moving
-    final routeWidth = step == FlowStep.nav ? 3 : 6;
-    polys.add(
-      Polyline(
-        polylineId: PolylineId("route$safeIndex"),
-        color: _kMainTeal,
-        width: routeWidth,
-        points: routes[safeIndex].points,
-        zIndex: 1,
-        consumeTapEvents: true,
-        onTap: () {
-          if (step != FlowStep.choose || routes.isEmpty) return;
-          chosenRoute = safeIndex;
-          _drawRoutesBasic();
+    final selectedPoints = routes[safeIndex].points;
+    final routeWidth = step == FlowStep.nav ? 8 : 6;
+    if (step == FlowStep.nav && _navCurrentLocation != null && selectedPoints.length >= 2) {
+      final closestIdx = _closestRoutePointIndex(_navCurrentLocation!, selectedPoints);
+      _lastNavClosestIndex = closestIdx;
+      final traveledPoints = selectedPoints.sublist(0, (closestIdx + 1).clamp(1, selectedPoints.length));
+      final remainingPoints = selectedPoints.sublist(closestIdx.clamp(0, selectedPoints.length - 1));
+      polys.add(
+        Polyline(
+          polylineId: PolylineId("route${safeIndex}_traveled"),
+          color: _kMainTeal.withOpacity(0.28),
+          width: routeWidth,
+          points: traveledPoints,
+          zIndex: 1,
+        ),
+      );
+      polys.add(
+        Polyline(
+          polylineId: PolylineId("route${safeIndex}_remaining"),
+          color: _kMainTeal,
+          width: routeWidth,
+          points: remainingPoints,
+          zIndex: 2,
+        ),
+      );
+      // #region agent log
+      debugLog(
+        'map_screen.dart:_drawRoutesBasic',
+        'nav polyline split',
+        runId: 'initial',
+        hypothesisId: 'H1',
+        data: {
+          'closestIdx': closestIdx,
+          'totalPoints': selectedPoints.length,
+          'traveledPoints': traveledPoints.length,
+          'remainingPoints': remainingPoints.length,
         },
-      ),
-    );
+      );
+      // #endregion
+    } else {
+      polys.add(
+        Polyline(
+          polylineId: PolylineId("route$safeIndex"),
+          color: _kMainTeal,
+          width: routeWidth,
+          points: selectedPoints,
+          zIndex: 1,
+          consumeTapEvents: true,
+          onTap: () {
+            if (step != FlowStep.choose || routes.isEmpty) return;
+            chosenRoute = safeIndex;
+            _drawRoutesBasic();
+          },
+        ),
+      );
+    }
 
     // During nav/reroute don't show origin pin (avoids red pin); destination only
     if (origin != null && step != FlowStep.nav) {

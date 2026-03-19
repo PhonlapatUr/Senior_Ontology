@@ -27,14 +27,14 @@ TMD_TOKEN_ENV = os.getenv("TMD_TOKEN")
 # NOTE: There is a placeholder token in code to keep the app from crashing.
 # Real weather requires setting `TMD_TOKEN` environment variable to a valid OAuth access token.
 TMD_TOKEN = TMD_TOKEN_ENV or (
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjA3YzIxNTJiYzBhYTQ4MDhkOTdiMjljMTcxNzBlOGViMjJhMjg1NTgyYjQ1MzQ3ZWZiZGM2YzcxMzZmMWIyYTAwNzFlZDQ0OTkxMzI2ZmI0In0.eyJhdWQiOiIyIiwianRpIjoiMDdjMjE1MmJjMGFhNDgwOGQ5N2IyOWMxNzE3MGU4ZWIyMmEyODU1ODJiNDUzNDdlZmJkYzZjNzEzNmYxYjJhMDA3MWVkNDQ5OTEzMjZmYjQiLCJpYXQiOjE3NzM5NDU2OTEsIm5iZiI6MTc3Mzk0NTY5MSwiZXhwIjoxODA1NDgxNjkxLCJzdWIiOiI0NjU4Iiwic2NvcGVzIjpbXX0.WsBRzYFjDWWFXC989D-7f7bvudOtZAR8KUL7pjHQhF-Fb6nc3HlE3G_99bj6GiHWMARdjnLRZoWBAtkhLjCCnYM5NueN4mVTAl9UOSMK_Gniaq_lFXgFpOIpV9J2AICQqTC4anYTmzyKuIyzT2Imr4OWF4kJtY1HTFKtG4FVqIUd5Vrvdb3yyb3GezkdUIafJuKra8pMNQAQ8R3Z_50V55POVRmyiEJhwNlc0BfVrcLRtRvcrwDx6cZojdnAglHsBFys8fJOogUUkOX-8qmR2g0RCz28-5Nx-0rwQ6XKYyyuoycq7YU2wB7ABTkCjqth7khcIHC9MeiEkZgpYDrb7CoKJfDUb1o4YWvMItXV94Aj-IYulHJvLjZNu_qyW86TeeeqPj2U97qapZGcM8nb2L6XAuIraToZ4LUSbTWPYIaAQTt7_clTr3Ssri_zaWZ5YMmFbgKIbY6E_fpmY6ui8WZ7_MgZpINdKIfavuExPffHJ84burTQ5FkepTFsEYb95GTw5DkUL6_0WV0YQ0bJVvU66RxfUX4PlRheIPyzsWNg_cDOiLTD3yR9GR80rhM7jBtsjU946oeLKIQjcEW69r02-lYeYtCv_b4em5N5-HzuQy-5cWVOyiJLNCKxouEbUh57fLF11Rt9C5L7HfnyKHX09rlRVEZlOvwVgACDMBI"
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImQwMjliNTRjODY4OGNkOGFkNmFiODY1NWMwZjQwZGI2ZmI0M2JjMzlhMDA2M2Q4NDA3NjhiYTE1MDg4YTk4YzY2NzNkMjYyZGFjYWRhMTc5In0.eyJhdWQiOiIyIiwianRpIjoiZDAyOWI1NGM4Njg4Y2Q4YWQ2YWI4NjU1YzBmNDBkYjZmYjQzYmMzOWEwMDYzZDg0MDc2OGJhMTUwODhhOThjNjY3M2QyNjJkYWNhZGExNzkiLCJpYXQiOjE3NzM5NTE0NDUsIm5iZiI6MTc3Mzk1MTQ0NSwiZXhwIjoxODA1NDg3NDQ1LCJzdWIiOiI0NjU4Iiwic2NvcGVzIjpbXX0.ffryqtdgN72QC3wxIQPrwAdIy1mKQd795uouoHwarugjX0UfPiGMHxKlhQh0vEYtscjGYWBAov_fudHyZB--koHs438EAU4UcTjzxMUzNJy3qlwtOfZhyPX_qKGDk7m6vhpmOihC98Zvq0OcGVbgLDapkAm64ojQYw-OX3EQyz942bEB1CJlDeEXirro274Bsbj0gqdTVO2sHERWjMyplKW27gu4DocUPLVRbD97fDS-oGa0WbFrsxDG72qAYSs3-7lyEPk6qiGH3tkJGD9-qXxc1AnSaE6B-685dKMdBQxJMa5LXnTSV0mMPfK7V4GW70s8pKOZWaQsyz5Zj1SCWFvEf-UrNbJTmmYqmlHYQ6BGt0t9oj6pXAaTJQsOcdjOiEZqiYN06MBuEZ-YVP36INw7F1JuB1dgZA4z9crFUiDb4jINUuofhsPf1lsd1-Eh76n7laX_gx54-oDKwEqVHSnecyqlRXkgE179qRmLp9d2MLRQLuI_tIPEqr-9jrHvMB6vWFT8Opu0cWMwexMaavMX0TAySANYV-H7ahVkxA_Bee-xnp71L7KyW6uDA9F8pAv6-pumupzp7t8-0-lB-hw9An0sewhgbrmJjziwTrbDeLxOsHwFoOvd-yWKB-Hb-FW-KbUxmaybJeIBFifChc_LWhopXidVGtCvFl_vKwQ"
 )
 
 if TMD_TOKEN_ENV is None:
     print("[TMD] WARNING: `TMD_TOKEN` env var not set. Using placeholder token; humidity requests will likely fail.")
 
 
-USER_DB_PATH = "Key.json"  # ไฟล์เก็บข้อมูลผู้ใช้ที่ฝั่ง Server
+USER_DB_PATH = "Key.json"  
 ONTOLOGY_PATH = os.path.join(os.path.dirname(__file__), "ontology_fixed.ttl")
 
 LANG = "en"
@@ -524,6 +524,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def root():
+    return {"message": "Senior Ontology API is running", "health": "/health"}
 
 @app.get("/health")
 def health(): return {"ok": True}
