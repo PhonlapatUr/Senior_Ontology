@@ -1,0 +1,230 @@
+%PDF-1.4
+1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj
+2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj
+3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>endobj
+4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj
+5 0 obj<< /Length 5258 >>stream
+BT /F1 14 Tf 30 745 Td (Project Name: Senior Ontology - Smart Route & User Management API) Tj ET
+BT /F1 16 Tf 30 720 Td (Test Case \(Happy Case\)) Tj ET
+BT /F1 11 Tf 40 660 Td (Test Case ID: ScoreRoutesHappyCase) Tj ET
+BT /F1 11 Tf 40 642 Td (Test Priority \(Low/Medium/High\): High) Tj ET
+BT /F1 11 Tf 40 624 Td (Module Name: DSS Score Routes) Tj ET
+BT /F1 11 Tf 40 606 Td (Test Title: Successful Submission of Score Routes) Tj ET
+BT /F1 11 Tf 40 588 Td (Description: Valid input returns expected score fields.) Tj ET
+BT /F1 11 Tf 382 660 Td (Test Designed by: ____________) Tj ET
+BT /F1 11 Tf 382 642 Td (Test Designed date: ____________) Tj ET
+BT /F1 11 Tf 382 624 Td (Test Executed by: ____________) Tj ET
+BT /F1 11 Tf 382 606 Td (Test Execution date: ____________) Tj ET
+1 w
+30 610 m 582 610 l S
+BT /F1 12 Tf 30 585 Td (Pre-conditions:) Tj ET
+BT /F1 10 Tf 40 569 Td (- Backend server.py is running \(FastAPI\).) Tj ET
+BT /F1 10 Tf 40 557 Td (- Endpoint /scoreRoutes is available.) Tj ET
+BT /F1 10 Tf 40 545 Td (- Mocking enabled for deterministic outputs.) Tj ET
+BT /F1 12 Tf 30 525 Td (Dependencies:) Tj ET
+BT /F1 10 Tf 40 509 Td (- Backend DSS scoring logic) Tj ET
+BT /F1 10 Tf 40 497 Td (- External AQ/Humidity calls mocked \(unit test\)) Tj ET
+1 w
+30 480 m 582 480 l S
+1 w
+30 470 m 582 470 l S
+1 w
+30 426 m 582 426 l S
+1 w
+30 382 m 582 382 l S
+1 w
+30 338 m 582 338 l S
+1 w
+30 294 m 582 294 l S
+1 w
+30 250 m 582 250 l S
+1 w
+30 206 m 582 206 l S
+1 w
+30 162 m 582 162 l S
+1 w
+30 162 m 30 470 l S
+1 w
+50 162 m 50 470 l S
+1 w
+160 162 m 160 470 l S
+1 w
+260 162 m 260 470 l S
+1 w
+380 162 m 380 470 l S
+1 w
+475 162 m 475 470 l S
+1 w
+535 162 m 535 470 l S
+1 w
+582 162 m 582 470 l S
+q 30 424 20 48 re W n
+BT /F1 9 Tf 34 440 Td (Step) Tj ET
+Q
+q 50 424 110 48 re W n
+BT /F1 9 Tf 54 440 Td (Test Steps) Tj ET
+Q
+q 160 424 100 48 re W n
+BT /F1 9 Tf 164 440 Td (Test Data) Tj ET
+Q
+q 260 424 120 48 re W n
+BT /F1 9 Tf 264 440 Td (Expected Result) Tj ET
+Q
+q 380 424 95 48 re W n
+BT /F1 9 Tf 384 440 Td (Actual Result) Tj ET
+Q
+q 475 424 60 48 re W n
+BT /F1 9 Tf 479 440 Td (Status) Tj ET
+BT /F1 9 Tf 479 429 Td (\(Pass/Fail\)) Tj ET
+Q
+q 535 424 47 48 re W n
+BT /F1 9 Tf 539 440 Td (Notes) Tj ET
+Q
+q 30 424 20 48 re W n
+BT /F1 9 Tf 34 442 Td (1) Tj ET
+Q
+q 50 424 110 48 re W n
+BT /F1 9 Tf 54 442 Td (Prepare request) Tj ET
+Q
+q 160 424 100 48 re W n
+BT /F1 9 Tf 164 442 Td (routes=[{id=1}];) Tj ET
+BT /F1 9 Tf 164 431 Td (sample_stride=1) Tj ET
+Q
+q 260 424 120 48 re W n
+BT /F1 9 Tf 264 442 Td (Valid payload is ready) Tj ET
+Q
+q 380 424 95 48 re W n
+BT /F1 9 Tf 384 442 Td () Tj ET
+Q
+q 475 424 60 48 re W n
+BT /F1 9 Tf 479 442 Td (Pass) Tj ET
+Q
+q 535 424 47 48 re W n
+BT /F1 9 Tf 539 442 Td () Tj ET
+Q
+q 30 380 20 48 re W n
+BT /F1 9 Tf 34 398 Td (2) Tj ET
+Q
+q 50 380 110 48 re W n
+BT /F1 9 Tf 54 398 Td (Submit POST /scoreRoutes) Tj ET
+Q
+q 160 380 100 48 re W n
+BT /F1 9 Tf 164 398 Td (encodedPolyline valid) Tj ET
+BT /F1 9 Tf 164 387 Td (\(mocked\)) Tj ET
+Q
+q 260 380 120 48 re W n
+BT /F1 9 Tf 264 398 Td (Endpoint returns HTTP 200) Tj ET
+Q
+q 380 380 95 48 re W n
+BT /F1 9 Tf 384 398 Td () Tj ET
+Q
+q 475 380 60 48 re W n
+BT /F1 9 Tf 479 398 Td (Pass) Tj ET
+Q
+q 535 380 47 48 re W n
+BT /F1 9 Tf 539 398 Td () Tj ET
+Q
+q 30 336 20 48 re W n
+BT /F1 9 Tf 34 354 Td (3) Tj ET
+Q
+q 50 336 110 48 re W n
+BT /F1 9 Tf 54 354 Td (Check scores array) Tj ET
+Q
+q 160 336 100 48 re W n
+BT /F1 9 Tf 164 354 Td (expect len\(scores\)=1) Tj ET
+Q
+q 260 336 120 48 re W n
+BT /F1 9 Tf 264 354 Td (scores present and length is) Tj ET
+BT /F1 9 Tf 264 343 Td (1) Tj ET
+Q
+q 380 336 95 48 re W n
+BT /F1 9 Tf 384 354 Td () Tj ET
+Q
+q 475 336 60 48 re W n
+BT /F1 9 Tf 479 354 Td (Pass) Tj ET
+Q
+q 535 336 47 48 re W n
+BT /F1 9 Tf 539 354 Td () Tj ET
+Q
+q 30 292 20 48 re W n
+BT /F1 9 Tf 34 310 Td (4) Tj ET
+Q
+q 50 292 110 48 re W n
+BT /F1 9 Tf 54 310 Td (Validate DSS fields) Tj ET
+Q
+q 160 292 100 48 re W n
+BT /F1 9 Tf 164 310 Td (di, dt, dp, dw present) Tj ET
+Q
+q 260 292 120 48 re W n
+BT /F1 9 Tf 264 310 Td (di~0, dt~0, dp~0.5) Tj ET
+Q
+q 380 292 95 48 re W n
+BT /F1 9 Tf 384 310 Td () Tj ET
+Q
+q 475 292 60 48 re W n
+BT /F1 9 Tf 479 310 Td (Pass) Tj ET
+Q
+q 535 292 47 48 re W n
+BT /F1 9 Tf 539 310 Td () Tj ET
+Q
+q 30 248 20 48 re W n
+BT /F1 9 Tf 34 266 Td (5) Tj ET
+Q
+q 50 248 110 48 re W n
+BT /F1 9 Tf 54 266 Td (Validate weather weighting) Tj ET
+Q
+q 160 248 100 48 re W n
+BT /F1 9 Tf 164 266 Td (dw derived from humidity) Tj ET
+Q
+q 260 248 120 48 re W n
+BT /F1 9 Tf 264 266 Td (dw~0.5) Tj ET
+Q
+q 380 248 95 48 re W n
+BT /F1 9 Tf 384 266 Td () Tj ET
+Q
+q 475 248 60 48 re W n
+BT /F1 9 Tf 479 266 Td (Pass) Tj ET
+Q
+q 535 248 47 48 re W n
+BT /F1 9 Tf 539 266 Td () Tj ET
+Q
+q 30 204 20 48 re W n
+BT /F1 9 Tf 34 222 Td (6) Tj ET
+Q
+q 50 204 110 48 re W n
+BT /F1 9 Tf 54 222 Td (Validate final risk_score) Tj ET
+Q
+q 160 204 100 48 re W n
+BT /F1 9 Tf 164 222 Td (deterministic mocks) Tj ET
+Q
+q 260 204 120 48 re W n
+BT /F1 9 Tf 264 222 Td (risk_score~0.2) Tj ET
+Q
+q 380 204 95 48 re W n
+BT /F1 9 Tf 384 222 Td () Tj ET
+Q
+q 475 204 60 48 re W n
+BT /F1 9 Tf 479 222 Td (Pass) Tj ET
+Q
+q 535 204 47 48 re W n
+BT /F1 9 Tf 539 222 Td (Automated) Tj ET
+Q
+1 w
+30 154 m 582 154 l S
+BT /F1 12 Tf 30 146 Td (Post-conditions:) Tj ET
+BT /F1 10 Tf 40 120 Td (- UI can display route risk score using API response.) Tj ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000056 00000 n 
+0000000111 00000 n 
+0000000235 00000 n 
+0000000303 00000 n 
+trailer<< /Size 6 /Root 1 0 R >>
+startxref
+5611
+%%EOF

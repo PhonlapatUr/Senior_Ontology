@@ -1,0 +1,159 @@
+%PDF-1.4
+1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj
+2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj
+3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>endobj
+4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj
+5 0 obj<< /Length 3607 >>stream
+BT /F1 14 Tf 30 745 Td (Project Name: Senior Ontology - Smart Route & User Management API) Tj ET
+BT /F1 16 Tf 30 720 Td (Test Case \(Fail Case\)) Tj ET
+BT /F1 11 Tf 40 660 Td (Test Case ID: SignupDuplicateEmail) Tj ET
+BT /F1 11 Tf 40 642 Td (Test Priority \(Low/Medium/High\): High) Tj ET
+BT /F1 11 Tf 40 624 Td (Module Name: User Management) Tj ET
+BT /F1 11 Tf 40 606 Td (Test Title: Signup duplicate email handling) Tj ET
+BT /F1 11 Tf 40 588 Td (Description: Duplicate signup returns HTTP 400.) Tj ET
+BT /F1 11 Tf 382 660 Td (Test Designed by: ____________) Tj ET
+BT /F1 11 Tf 382 642 Td (Test Designed date: ____________) Tj ET
+BT /F1 11 Tf 382 624 Td (Test Executed by: ____________) Tj ET
+BT /F1 11 Tf 382 606 Td (Test Execution date: ____________) Tj ET
+1 w
+30 610 m 582 610 l S
+BT /F1 12 Tf 30 585 Td (Pre-conditions:) Tj ET
+BT /F1 10 Tf 40 569 Td (- Email already exists in storage.) Tj ET
+BT /F1 12 Tf 30 549 Td (Dependencies:) Tj ET
+BT /F1 10 Tf 40 533 Td (- signup handler) Tj ET
+BT /F1 10 Tf 40 521 Td (- read_users mocked for duplicate email) Tj ET
+1 w
+30 480 m 582 480 l S
+1 w
+30 470 m 582 470 l S
+1 w
+30 426 m 582 426 l S
+1 w
+30 382 m 582 382 l S
+1 w
+30 338 m 582 338 l S
+1 w
+30 294 m 582 294 l S
+1 w
+30 294 m 30 470 l S
+1 w
+50 294 m 50 470 l S
+1 w
+160 294 m 160 470 l S
+1 w
+260 294 m 260 470 l S
+1 w
+380 294 m 380 470 l S
+1 w
+475 294 m 475 470 l S
+1 w
+535 294 m 535 470 l S
+1 w
+582 294 m 582 470 l S
+q 30 424 20 48 re W n
+BT /F1 9 Tf 34 440 Td (Step) Tj ET
+Q
+q 50 424 110 48 re W n
+BT /F1 9 Tf 54 440 Td (Test Steps) Tj ET
+Q
+q 160 424 100 48 re W n
+BT /F1 9 Tf 164 440 Td (Test Data) Tj ET
+Q
+q 260 424 120 48 re W n
+BT /F1 9 Tf 264 440 Td (Expected Result) Tj ET
+Q
+q 380 424 95 48 re W n
+BT /F1 9 Tf 384 440 Td (Actual Result) Tj ET
+Q
+q 475 424 60 48 re W n
+BT /F1 9 Tf 479 440 Td (Status) Tj ET
+BT /F1 9 Tf 479 429 Td (\(Pass/Fail\)) Tj ET
+Q
+q 535 424 47 48 re W n
+BT /F1 9 Tf 539 440 Td (Notes) Tj ET
+Q
+q 30 424 20 48 re W n
+BT /F1 9 Tf 34 442 Td (1) Tj ET
+Q
+q 50 424 110 48 re W n
+BT /F1 9 Tf 54 442 Td (Prepare signup data) Tj ET
+Q
+q 160 424 100 48 re W n
+BT /F1 9 Tf 164 442 Td (email=duplicate@example.) Tj ET
+BT /F1 9 Tf 164 431 Td (com) Tj ET
+Q
+q 260 424 120 48 re W n
+BT /F1 9 Tf 264 442 Td (Valid signup payload) Tj ET
+Q
+q 380 424 95 48 re W n
+BT /F1 9 Tf 384 442 Td () Tj ET
+Q
+q 475 424 60 48 re W n
+BT /F1 9 Tf 479 442 Td (Pass) Tj ET
+Q
+q 535 424 47 48 re W n
+BT /F1 9 Tf 539 442 Td () Tj ET
+Q
+q 30 380 20 48 re W n
+BT /F1 9 Tf 34 398 Td (2) Tj ET
+Q
+q 50 380 110 48 re W n
+BT /F1 9 Tf 54 398 Td (Submit signup) Tj ET
+Q
+q 160 380 100 48 re W n
+BT /F1 9 Tf 164 398 Td (Call signup handler) Tj ET
+Q
+q 260 380 120 48 re W n
+BT /F1 9 Tf 264 398 Td (Duplicate email detected) Tj ET
+Q
+q 380 380 95 48 re W n
+BT /F1 9 Tf 384 398 Td () Tj ET
+Q
+q 475 380 60 48 re W n
+BT /F1 9 Tf 479 398 Td (Pass) Tj ET
+Q
+q 535 380 47 48 re W n
+BT /F1 9 Tf 539 398 Td () Tj ET
+Q
+q 30 336 20 48 re W n
+BT /F1 9 Tf 34 354 Td (3) Tj ET
+Q
+q 50 336 110 48 re W n
+BT /F1 9 Tf 54 354 Td (Validate error) Tj ET
+Q
+q 160 336 100 48 re W n
+BT /F1 9 Tf 164 354 Td (HTTPException) Tj ET
+BT /F1 9 Tf 164 343 Td (status_code=400) Tj ET
+Q
+q 260 336 120 48 re W n
+BT /F1 9 Tf 264 354 Td (detail mentions 'Email) Tj ET
+BT /F1 9 Tf 264 343 Td (already registered') Tj ET
+Q
+q 380 336 95 48 re W n
+BT /F1 9 Tf 384 354 Td () Tj ET
+Q
+q 475 336 60 48 re W n
+BT /F1 9 Tf 479 354 Td (Pass) Tj ET
+Q
+q 535 336 47 48 re W n
+BT /F1 9 Tf 539 354 Td (Automated) Tj ET
+Q
+1 w
+30 286 m 582 286 l S
+BT /F1 12 Tf 30 278 Td (Post-conditions:) Tj ET
+BT /F1 10 Tf 40 252 Td (- Caller receives HTTP 400 message 'Email already registered'.) Tj ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000056 00000 n 
+0000000111 00000 n 
+0000000235 00000 n 
+0000000303 00000 n 
+trailer<< /Size 6 /Root 1 0 R >>
+startxref
+3960
+%%EOF
