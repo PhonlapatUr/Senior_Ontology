@@ -49,15 +49,14 @@ class NavOverlay extends StatelessWidget {
     // #region agent log
     debugLog(
       'nav_overlay.dart:build',
-      'nav overlay metrics',
+      'navigation overlay computed values',
       runId: 'initial',
       hypothesisId: 'H1',
       data: {
         'remainingMeters': remainingMeters,
         'durationRemainingSec': durationRemainingSec,
-        'routeDistanceMeters': route.distanceMeters,
-        'routePoints': route.points.length,
-        'isArrivalThreshold': remainingMeters <= 200,
+        'hasCurrentLocation': currentLocation != null,
+        'isNear200m': remainingMeters <= 200.0,
       },
     );
     // #endregion

@@ -178,6 +178,15 @@ class _MapScreenState extends State<MapScreen> {
       if (step == FlowStep.nav && routes.isNotEmpty) {
         final navPoints = routes[chosenRoute.clamp(0, routes.length - 1)].points;
         final idx = _closestRoutePointIndex(latLng, navPoints);
+        final remainingMeters = distanceRemainingAlongRoute(latLng, navPoints);
+        final destinationMeters = dest == null
+            ? -1.0
+            : Geolocator.distanceBetween(
+                latLng.latitude,
+                latLng.longitude,
+                dest!.latitude,
+                dest!.longitude,
+              );
         debugLog(
           'map_screen.dart:_startPositionStream',
           'position update',
@@ -188,6 +197,10 @@ class _MapScreenState extends State<MapScreen> {
             'lng': position.longitude,
             'closestIdx': idx,
             'routePoints': navPoints.length,
+            'remainingMeters': remainingMeters,
+            'destinationMeters': destinationMeters,
+            'isNear200m': remainingMeters <= 200.0,
+            'isNearDestination200m': destinationMeters >= 0 && destinationMeters <= 200.0,
           },
         );
       }
@@ -1549,15 +1562,13 @@ class _MapScreenState extends State<MapScreen> {
                 // #region agent log
                 debugLog(
                   'map_screen.dart:NavOverlay.onExit',
-                  'user tapped exit in nav overlay',
+                  'exit navigation tapped',
                   runId: 'initial',
                   hypothesisId: 'H4',
                   data: {
                     'stepBefore': step.name,
                     'originText': startCtrl.text,
-                    'destText': endCtrl.text,
-                    'hasOrigin': origin != null,
-                    'hasDest': dest != null,
+                    'destinationText': endCtrl.text,
                   },
                 );
                 // #endregion
