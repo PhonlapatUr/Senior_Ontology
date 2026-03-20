@@ -26,5 +26,12 @@
         "email": "dom3@gmail.com",
         "phonenum": "0978908901",
         "password": "123456"
+    },
+    {
+        "firstname": "D",
+        "lastname": "Y",
+        "email": "dom6@gmail.com",
+        "phonenum": "098908657",
+        "password": "123456"
     }
 ]

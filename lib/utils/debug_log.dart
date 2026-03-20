@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 // #region agent log
 const String _kIngestUrl =
     'http://127.0.0.1:7667/ingest/234234c2-748b-4fb0-820a-7861ecd2da64';
-const String _kSessionId = 'ac8388';
+const String _kSessionId = '9bfe97';
 
 void debugLog(String location, String message,
     {String? runId, String? hypothesisId, Map<String, dynamic>? data}) {
@@ -17,7 +17,7 @@ void debugLog(String location, String message,
     if (hypothesisId != null) 'hypothesisId': hypothesisId,
     if (data != null) 'data': data,
   };
-  print('[DEBUG_SESSION_ac8388] ${jsonEncode(payload)}');
+  print('[DEBUG_SESSION_9bfe97] ${jsonEncode(payload)}');
   http
       .post(
     Uri.parse(_kIngestUrl),
