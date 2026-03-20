@@ -27,11 +27,31 @@ TMD_TOKEN_ENV = os.getenv("TMD_TOKEN")
 # NOTE: There is a placeholder token in code to keep the app from crashing.
 # Real weather requires setting `TMD_TOKEN` environment variable to a valid OAuth access token.
 TMD_TOKEN = TMD_TOKEN_ENV or (
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImQwMjliNTRjODY4OGNkOGFkNmFiODY1NWMwZjQwZGI2ZmI0M2JjMzlhMDA2M2Q4NDA3NjhiYTE1MDg4YTk4YzY2NzNkMjYyZGFjYWRhMTc5In0.eyJhdWQiOiIyIiwianRpIjoiZDAyOWI1NGM4Njg4Y2Q4YWQ2YWI4NjU1YzBmNDBkYjZmYjQzYmMzOWEwMDYzZDg0MDc2OGJhMTUwODhhOThjNjY3M2QyNjJkYWNhZGExNzkiLCJpYXQiOjE3NzM5NTE0NDUsIm5iZiI6MTc3Mzk1MTQ0NSwiZXhwIjoxODA1NDg3NDQ1LCJzdWIiOiI0NjU4Iiwic2NvcGVzIjpbXX0.ffryqtdgN72QC3wxIQPrwAdIy1mKQd795uouoHwarugjX0UfPiGMHxKlhQh0vEYtscjGYWBAov_fudHyZB--koHs438EAU4UcTjzxMUzNJy3qlwtOfZhyPX_qKGDk7m6vhpmOihC98Zvq0OcGVbgLDapkAm64ojQYw-OX3EQyz942bEB1CJlDeEXirro274Bsbj0gqdTVO2sHERWjMyplKW27gu4DocUPLVRbD97fDS-oGa0WbFrsxDG72qAYSs3-7lyEPk6qiGH3tkJGD9-qXxc1AnSaE6B-685dKMdBQxJMa5LXnTSV0mMPfK7V4GW70s8pKOZWaQsyz5Zj1SCWFvEf-UrNbJTmmYqmlHYQ6BGt0t9oj6pXAaTJQsOcdjOiEZqiYN06MBuEZ-YVP36INw7F1JuB1dgZA4z9crFUiDb4jINUuofhsPf1lsd1-Eh76n7laX_gx54-oDKwEqVHSnecyqlRXkgE179qRmLp9d2MLRQLuI_tIPEqr-9jrHvMB6vWFT8Opu0cWMwexMaavMX0TAySANYV-H7ahVkxA_Bee-xnp71L7KyW6uDA9F8pAv6-pumupzp7t8-0-lB-hw9An0sewhgbrmJjziwTrbDeLxOsHwFoOvd-yWKB-Hb-FW-KbUxmaybJeIBFifChc_LWhopXidVGtCvFl_vKwQ"
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImM3ZDUxYzU0Njc3NWE5YTkxNTU0ZWE3NWJmYTljMWZjNWFhMGM1YWQ2ZDEzMzI1NWIxZDdmODA5Yjg0YjE2Mjc1YjdmZmFkNWI2NzkyZDIwIn0.eyJhdWQiOiIyIiwianRpIjoiYzdkNTFjNTQ2Nzc1YTlhOTE1NTRlYTc1YmZhOWMxZmM1YWEwYzVhZDZkMTMzMjU1YjFkN2Y4MDliODRiMTYyNzViN2ZmYWQ1YjY3OTJkMjAiLCJpYXQiOjE3NzQwMzQ4OTQsIm5iZiI6MTc3NDAzNDg5NCwiZXhwIjoxODA1NTcwODk0LCJzdWIiOiI1MDY1Iiwic2NvcGVzIjpbXX0.QZSVLQ1BkE70DqVq7oGKY1_IhqV08pJ4hm7HKpel7FIYf2vpeTP9iWAzbc1uq3-X1cd3fXkcOzL-lcyHPJg5oyvllrrIlQ-GbA-vC-lPUFGA0lZPXU0fTh6c5Yuplrulr1tSXugCCBhpH-9og_OMcT6EGTjBTn8m6edKZxFgH3cmz-QlbO6iVJn6n-0Id5QXgbImCG_G5doBUAF9vRujj8f8H6WWw1GLe3OxIS0jOPt4-bjz80SZJ8TOFL9O1oI3o-jESjvCx1qY3swTYu9iuTjxoaz5YKPvzWP6Ag1gBaznRc6hbTs3_jFsy4RG3M1dIGsFTIXqSburAW7VtdvPlzTRHWOi8J_oQN_8cc04-6oQVVnHXdA-Kc2ZQQjOfC6Qhn6XnTMC_F50MJeW1weVDvVdNwvYJvNaj4941JbYsilzGxVqetd-mM11kW56uZsZUszGN-YSeKVpWseeMGv7zGFDGo6lQYpUip37jpDZVIeN4TZUxLjKAsieT87k_LhJ-CeU2sjpTjXjZGOTWfHNI9DPBFl-MWDyTuH-NO8mOkBxljE8vruWL4PV2obnfJdwLbf8eu7v9ZEnJ-1kciE1y4XKDSLzHwvUW6lmACiEcvYXCtxPVoxtLvncnWefBV0WEktq_XVKod3zaNEW6Oq-jbc9b1KLF5prKHhVDvJAzLE"
 )
 
 if TMD_TOKEN_ENV is None:
     print("[TMD] WARNING: `TMD_TOKEN` env var not set. Using placeholder token; humidity requests will likely fail.")
+
+# #region agent log
+_DEBUG_LOG_PATH = os.path.join(os.path.dirname(__file__), ".cursor", "debug-9bfe97.log")
+
+def _agent_debug_log(location: str, message: str, run_id: str, hypothesis_id: str, data: dict):
+    try:
+        payload = {
+            "sessionId": "9bfe97",
+            "runId": run_id,
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": int(time.time() * 1000),
+        }
+        with open(_DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload, ensure_ascii=True) + "\n")
+    except Exception:
+        pass
+# #endregion
 
 
 USER_DB_PATH = "Key.json"  
@@ -167,6 +187,24 @@ async def fetch_humidity(client, lat, lon):
     date_str = now_th.strftime("%Y-%m-%d")
     hour = now_th.hour
 
+    # #region agent log
+    token_raw = os.getenv("TMD_TOKEN")
+    token_trimmed = (token_raw or "").strip()
+    _agent_debug_log(
+        "server.py:fetch_humidity:entry",
+        "humidity fetch entry",
+        run_id="initial",
+        hypothesis_id="H1",
+        data={
+            "lat": round(float(lat), 5),
+            "lon": round(float(lon), 5),
+            "hasEnvToken": token_raw is not None,
+            "tokenTrimmedLen": len(token_trimmed),
+            "usingPlaceholder": token_trimmed == "" or token_trimmed == TMD_TOKEN,
+            "hourBangkok": hour,
+        },
+    )
+    # #endregion
     try:
         # Keep one documented TMD endpoint only.
         tmd_url = (
@@ -181,6 +219,19 @@ async def fetch_humidity(client, lat, lon):
             },
             timeout=HTTP_TIMEOUT,
         )
+        # #region agent log
+        _agent_debug_log(
+            "server.py:fetch_humidity:tmd_response",
+            "tmd response received",
+            run_id="initial",
+            hypothesis_id="H2",
+            data={
+                "status": tmd_resp.status_code,
+                "urlHasHourlyAt": "forecast/hourly/at" in tmd_url,
+                "bodySnippet": (tmd_resp.text or "")[:120].replace("\n", " "),
+            },
+        )
+        # #endregion
 
         if tmd_resp.status_code == 200:
             try:
@@ -207,6 +258,18 @@ async def fetch_humidity(client, lat, lon):
                 "&timezone=Asia%2FBangkok"
             )
             rf = await client.get(fallback_url, timeout=HTTP_TIMEOUT)
+            # #region agent log
+            _agent_debug_log(
+                "server.py:fetch_humidity:fallback_response",
+                "fallback response received",
+                run_id="initial",
+                hypothesis_id="H3",
+                data={
+                    "status": rf.status_code,
+                    "bodySnippet": (rf.text or "")[:120].replace("\n", " "),
+                },
+            )
+            # #endregion
             if rf.status_code != 200:
                 body_snip = (rf.text or "")[:300].replace("\n", " ")
                 print(f"[Humidity] fallback status={rf.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'")
