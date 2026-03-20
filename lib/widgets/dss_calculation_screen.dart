@@ -399,20 +399,38 @@ class DSSCalculationScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                "Final Score = $equation",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: 'monospace',
+                              LayoutBuilder(
+                                builder: (context, constraints) => FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: SizedBox(
+                                    width: constraints.maxWidth,
+                                    child: Text(
+                                      "Final Score = $equation",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                               if (equationCalc.isNotEmpty) ...[
                                 const SizedBox(height: 8),
-                                Text(
-                                  equationCalc,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: 'monospace',
+                                LayoutBuilder(
+                                  builder: (context, constraints) => FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: Text(
+                                        equationCalc,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),

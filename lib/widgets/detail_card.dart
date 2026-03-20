@@ -557,12 +557,15 @@ class DetailCard extends StatelessWidget {
                             children: [
                               Icon(Icons.functions, color: _kMainTeal, size: 24),
                               const SizedBox(width: 8),
-                              const Text(
-                                "The equation for route evaluation:",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: _kMainTeal,
+                              const Expanded(
+                                child: Text(
+                                  "The equation for route evaluation:",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: _kMainTeal,
+                                  ),
+                                  softWrap: true,
                                 ),
                               ),
                             ],
@@ -587,21 +590,41 @@ class DetailCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Final Score = $equation",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: 'monospace',
-                                    fontWeight: FontWeight.w500,
+                                LayoutBuilder(
+                                  builder: (context, constraints) => FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: Text(
+                                        "Final Score = $equation",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'monospace',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        softWrap: true,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 if (equationCalc.isNotEmpty) ...[
                                   const SizedBox(height: 8),
-                                  Text(
-                                    equationCalc,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: 'monospace',
+                                  LayoutBuilder(
+                                    builder: (context, constraints) => FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: SizedBox(
+                                        width: constraints.maxWidth,
+                                        child: Text(
+                                          equationCalc,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontFamily: 'monospace',
+                                          ),
+                                          softWrap: true,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 8),

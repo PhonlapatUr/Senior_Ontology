@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-String prettyKm(int m) => "${(m / 1000).toStringAsFixed(1)} km";
+String prettyKm(int m) {
+  if (m < 1000) return "$m m";
+  return "${(m / 1000).toStringAsFixed(1)} km";
+}
 
 int isoSec(String iso) {
   if (!iso.endsWith("s")) return 0;

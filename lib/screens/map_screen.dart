@@ -111,6 +111,7 @@ class _MapScreenState extends State<MapScreen> {
   DateTime? _lastRecalcRouteAt;
   static const Duration _recalcCooldown = Duration(seconds: 15);
   int _lastNavClosestIndex = 0;
+  bool _arrivalDialogShown = false;
 
   /// Route info panel: true = maximized (default), false = minimized to see map
   bool _routePanelExpanded = true;
@@ -203,6 +204,17 @@ class _MapScreenState extends State<MapScreen> {
             'isNearDestination200m': destinationMeters >= 0 && destinationMeters <= 200.0,
           },
         );
+        final route = routes[chosenRoute.clamp(0, routes.length - 1)];
+        final totalMeters = route.distanceMeters > 0 ? route.distanceMeters.toDouble() : 1.0;
+        final durationRemainingSec =
+            (remainingMeters / totalMeters * route.durationSec).round().clamp(0, 999999);
+        final arrived = durationRemainingSec == 0 ||
+            remainingMeters <= 20.0 ||
+            (destinationMeters >= 0 && destinationMeters <= 20.0);
+        if (arrived && !_arrivalDialogShown) {
+          _arrivalDialogShown = true;
+          _showArrivedDialog();
+        }
       }
       // #endregion
       mapCtrl?.animateCamera(
@@ -253,6 +265,67 @@ class _MapScreenState extends State<MapScreen> {
     _positionSubscription?.cancel();
     _positionSubscription = null;
     _navCurrentLocation = null;
+  }
+
+  void _resetToFirstPage() {
+    _stopPositionStream();
+    FocusScope.of(context).unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      step = FlowStep.choose;
+      startCtrl.clear();
+      endCtrl.clear();
+      origin = null;
+      dest = null;
+      hasPollutionConcern = null;
+      showPollutionDialog = false;
+      showPollutantSelection = false;
+      selectedPollutants.clear();
+      routes.clear();
+      chosenRoute = 0;
+      indicators.clear();
+      routeScores.clear();
+      polys.clear();
+      marks.clear();
+      _arrivalDialogShown = false;
+    });
+  }
+
+  void _showArrivedDialog() {
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Expanded(child: Text("You arrived")),
+              IconButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  _resetToFirstPage();
+                },
+                icon: const Icon(Icons.close),
+                tooltip: "Close",
+              ),
+            ],
+          ),
+          content: const Text(
+            "You have arrived at your destination.",
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _resetToFirstPage();
+              },
+              child: const Text("Back to start"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /// Recalculate route from current location to destination (e.g. when user goes off-route).
@@ -359,7 +432,10 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
     if (!mounted) return;
-    setState(() => step = FlowStep.nav);
+    setState(() {
+      step = FlowStep.nav;
+      _arrivalDialogShown = false;
+    });
     _drawRoutesBasic();
     // #region agent log
     debugLog(
@@ -1532,6 +1608,7 @@ class _MapScreenState extends State<MapScreen> {
               route: routes[safeIndex],
               currentLocation: _navCurrentLocation ?? origin,
               destination: dest,
+              onArrivedClose: _resetToFirstPage,
               onRecenter: () {
                 final center = _navCurrentLocation ?? origin;
                 if (center != null && mapCtrl != null) {
