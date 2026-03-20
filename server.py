@@ -247,7 +247,7 @@ async def fetch_humidity(client, lat, lon):
                 f"[Humidity] source=tmd status={tmd_resp.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'"
             )
 
-        # Fallback source: Open-Meteo (keeps Dw usable when TMD endpoint/account is unavailable).
+        # Fallback source #1: Open-Meteo (keeps Dw usable when TMD endpoint/account is unavailable).
         # API docs: https://open-meteo.com/en/docs
         try:
             fallback_url = (
@@ -291,6 +291,54 @@ async def fetch_humidity(client, lat, lon):
             return float(rh_val)
         except Exception as fe:
             print(f"[Humidity] fallback request failed for lat={lat} lon={lon}: {fe}")
+        # Fallback source #2: MET Norway Locationforecast (no API key, requires User-Agent).
+        # Docs: https://api.met.no/weatherapi/locationforecast/2.0/documentation
+        try:
+            met_url = (
+                "https://api.met.no/weatherapi/locationforecast/2.0/compact"
+                f"?lat={lat}&lon={lon}"
+            )
+            rm = await client.get(
+                met_url,
+                headers={
+                    "accept": "application/json",
+                    "user-agent": "SeniorOntology/1.0 (contact: admin@example.com)",
+                },
+                timeout=HTTP_TIMEOUT,
+            )
+            # #region agent log
+            _agent_debug_log(
+                "server.py:fetch_humidity:metno_response",
+                "met.no response received",
+                run_id="initial",
+                hypothesis_id="H4",
+                data={
+                    "status": rm.status_code,
+                    "bodySnippet": (rm.text or "")[:120].replace("\n", " "),
+                },
+            )
+            # #endregion
+            if rm.status_code != 200:
+                body_snip = (rm.text or "")[:300].replace("\n", " ")
+                print(f"[Humidity] fallback2 status={rm.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'")
+                return None
+
+            jm = rm.json()
+            ts = ((jm.get("properties") or {}).get("timeseries") or [])
+            if not ts:
+                print(f"[Humidity] fallback2 missing timeseries for lat={lat} lon={lon}")
+                return None
+
+            details = (((ts[0] or {}).get("data") or {}).get("instant") or {}).get("details") or {}
+            rh_val = details.get("relative_humidity")
+            if rh_val is None:
+                print(f"[Humidity] fallback2 missing relative_humidity for lat={lat} lon={lon}")
+                return None
+
+            print(f"[Humidity] fallback2 source=met.no lat={lat} lon={lon} rh={rh_val}")
+            return float(rh_val)
+        except Exception as fe2:
+            print(f"[Humidity] fallback2 request failed for lat={lat} lon={lon}: {fe2}")
             return None
     except Exception as e:
         # Avoid leaking the token; just report coordinates and error.
