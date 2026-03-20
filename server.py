@@ -148,6 +148,9 @@ def sample_points(pts, stride):
 
 AQ_CACHE: Dict[str, Tuple[float, dict]] = {}
 def cache_key(lat, lon): return f"{round(lat,4)},{round(lon,4)}"
+HUMIDITY_CACHE: Dict[str, Tuple[float, Optional[float]]] = {}
+HUMIDITY_CACHE_TTL = 1800  # 30 minutes
+OPEN_METEO_BACKOFF_UNTIL = 0.0
 
 async def fetch_aqi(client, lat, lon):
     key = cache_key(lat, lon)
@@ -206,6 +209,15 @@ async def fetch_humidity(client, lat, lon):
     )
     # #endregion
     try:
+        # Cache humidity per rounded point so repeated requests don't hammer providers on Render.
+        h_key = cache_key(lat, lon)
+        h_now = time.time()
+        if h_key in HUMIDITY_CACHE:
+            ts, rh_cached = HUMIDITY_CACHE[h_key]
+            if h_now - ts < HUMIDITY_CACHE_TTL and rh_cached is not None:
+                print(f"[Humidity] cache hit lat={lat} lon={lon} rh={rh_cached}")
+                return float(rh_cached)
+
         # Keep one documented TMD endpoint only.
         tmd_url = (
             "https://data.tmd.go.th/nwpapi/v1/forecast/hourly/at"
@@ -238,6 +250,7 @@ async def fetch_humidity(client, lat, lon):
                 tmd_js = tmd_resp.json()
                 rh_val = tmd_js["WeatherForecasts"][0]["forecasts"][0]["data"]["rh"]
                 print(f"[Humidity] source=tmd lat={lat} lon={lon} rh={rh_val}")
+                HUMIDITY_CACHE[h_key] = (h_now, float(rh_val))
                 return float(rh_val)
             except Exception as e:
                 print(f"[Humidity] source=tmd status=200 but invalid payload lat={lat} lon={lon}; err={e}")
@@ -250,6 +263,9 @@ async def fetch_humidity(client, lat, lon):
         # Fallback source #1: Open-Meteo (keeps Dw usable when TMD endpoint/account is unavailable).
         # API docs: https://open-meteo.com/en/docs
         try:
+            global OPEN_METEO_BACKOFF_UNTIL
+            if time.time() < OPEN_METEO_BACKOFF_UNTIL:
+                raise RuntimeError("open-meteo temporarily skipped due to previous 429")
             fallback_url = (
                 "https://api.open-meteo.com/v1/forecast"
                 f"?latitude={lat}&longitude={lon}"
@@ -273,6 +289,8 @@ async def fetch_humidity(client, lat, lon):
             if rf.status_code != 200:
                 body_snip = (rf.text or "")[:300].replace("\n", " ")
                 print(f"[Humidity] fallback status={rf.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'")
+                if rf.status_code == 429:
+                    OPEN_METEO_BACKOFF_UNTIL = time.time() + 1800  # 30 min backoff on Render
                 raise RuntimeError(f"open-meteo status={rf.status_code}")
 
             jsf = rf.json()
@@ -288,6 +306,7 @@ async def fetch_humidity(client, lat, lon):
                 raise RuntimeError("open-meteo humidity list has no non-null values")
 
             print(f"[Humidity] fallback source=open-meteo lat={lat} lon={lon} rh={rh_val}")
+            HUMIDITY_CACHE[h_key] = (h_now, float(rh_val))
             return float(rh_val)
         except Exception as fe:
             print(f"[Humidity] fallback request failed for lat={lat} lon={lon}: {fe}")
@@ -336,6 +355,7 @@ async def fetch_humidity(client, lat, lon):
                 return None
 
             print(f"[Humidity] fallback2 source=met.no lat={lat} lon={lon} rh={rh_val}")
+            HUMIDITY_CACHE[h_key] = (h_now, float(rh_val))
             return float(rh_val)
         except Exception as fe2:
             print(f"[Humidity] fallback2 request failed for lat={lat} lon={lon}: {fe2}")
