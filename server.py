@@ -27,7 +27,7 @@ TMD_TOKEN_ENV = os.getenv("TMD_TOKEN")
 # NOTE: There is a placeholder token in code to keep the app from crashing.
 # Real weather requires setting `TMD_TOKEN` environment variable to a valid OAuth access token.
 TMD_TOKEN = TMD_TOKEN_ENV or (
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjRkZTdhNTEyZjAwYzkzMzVmYWFkMGNjNzE2ZjFjYjAxMDhiNTE1Yjg5ZmVmMWEzNmE1OGNlYzc0OTFmY2EyMDUzOTZjZjI1NzI2YjVlM2VjIn0.eyJhdWQiOiIyIiwianRpIjoiNGRlN2E1MTJmMDBjOTMzNWZhYWQwY2M3MTZmMWNiMDEwOGI1MTViODlmZWYxYTM2YTU4Y2VjNzQ5MWZjYTIwNTM5NmNmMjU3MjZiNWUzZWMiLCJpYXQiOjE3NzQwMzAzODMsIm5iZiI6MTc3NDAzMDM4MywiZXhwIjoxODA1NTY2MzgzLCJzdWIiOiI0NjU4Iiwic2NvcGVzIjpbXX0.ULvtOlCzHTeAgVrsVdLQqZi8mYTp3QgyYt8FTzTMLSpdZSBPOa9-P3_cTfY2UAGVkAzSE7qcbOaDyN3kf41xJWrAC5ViKTB5R_JdGZXflAZf0bGAJZHVkrXgEo-1HLjhdga-yMtD4YUbpmbCZPDI548Hk_hLnIzAgdTP9fVIsBGsSE2OaXN0s_y_cC_MTeiQLoZ0ShJCrD3uZ32NpIhbXXudUCwT7KskVS9KG2Yb-p61SmD-t1GtM7EgmTl81u51E2nyNP4AUUeUXdP9_A7Dn09alOLpdMWpD2ZLJ3zyT_M_Lew0BODY3x2zcl8OEg8jMHrn3CR0uPMKUdI8SE5F82P0CW7yaCGrFvXXfPjgOqpQrrR5fXK67RWD0wzXYvgRqK4YwFuobtkwenPU71enCRTplwXzFYLq2DS-UvL9pdlQ_by_IOZlXyK44xPI8W6Lz6Koh8QR4aquncDvlV3ilTqXh-BkPedhS9_bqs_W6jo_UDrdYXev5q5Llu7vadjlLWW8PRFSKZ_ls-JMyNnwUDtLUPIHY_TWax0Q49LbfJmR6fbjSlnt4f-hGxKzgXp4-GObOhCTVTnmgH0dVdMACPijac1DXuHt4GeCO6KOP4F0CrYRmhOX1jnTW6KnNaBNm40-tnz795Imj3eEV55RUnsBjECvW1Vw3Dr5KWShpD0"
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImQwMjliNTRjODY4OGNkOGFkNmFiODY1NWMwZjQwZGI2ZmI0M2JjMzlhMDA2M2Q4NDA3NjhiYTE1MDg4YTk4YzY2NzNkMjYyZGFjYWRhMTc5In0.eyJhdWQiOiIyIiwianRpIjoiZDAyOWI1NGM4Njg4Y2Q4YWQ2YWI4NjU1YzBmNDBkYjZmYjQzYmMzOWEwMDYzZDg0MDc2OGJhMTUwODhhOThjNjY3M2QyNjJkYWNhZGExNzkiLCJpYXQiOjE3NzM5NTE0NDUsIm5iZiI6MTc3Mzk1MTQ0NSwiZXhwIjoxODA1NDg3NDQ1LCJzdWIiOiI0NjU4Iiwic2NvcGVzIjpbXX0.ffryqtdgN72QC3wxIQPrwAdIy1mKQd795uouoHwarugjX0UfPiGMHxKlhQh0vEYtscjGYWBAov_fudHyZB--koHs438EAU4UcTjzxMUzNJy3qlwtOfZhyPX_qKGDk7m6vhpmOihC98Zvq0OcGVbgLDapkAm64ojQYw-OX3EQyz942bEB1CJlDeEXirro274Bsbj0gqdTVO2sHERWjMyplKW27gu4DocUPLVRbD97fDS-oGa0WbFrsxDG72qAYSs3-7lyEPk6qiGH3tkJGD9-qXxc1AnSaE6B-685dKMdBQxJMa5LXnTSV0mMPfK7V4GW70s8pKOZWaQsyz5Zj1SCWFvEf-UrNbJTmmYqmlHYQ6BGt0t9oj6pXAaTJQsOcdjOiEZqiYN06MBuEZ-YVP36INw7F1JuB1dgZA4z9crFUiDb4jINUuofhsPf1lsd1-Eh76n7laX_gx54-oDKwEqVHSnecyqlRXkgE179qRmLp9d2MLRQLuI_tIPEqr-9jrHvMB6vWFT8Opu0cWMwexMaavMX0TAySANYV-H7ahVkxA_Bee-xnp71L7KyW6uDA9F8pAv6-pumupzp7t8-0-lB-hw9An0sewhgbrmJjziwTrbDeLxOsHwFoOvd-yWKB-Hb-FW-KbUxmaybJeIBFifChc_LWhopXidVGtCvFl_vKwQ"
 )
 
 if TMD_TOKEN_ENV is None:
@@ -128,30 +128,6 @@ def sample_points(pts, stride):
 
 AQ_CACHE: Dict[str, Tuple[float, dict]] = {}
 def cache_key(lat, lon): return f"{round(lat,4)},{round(lon,4)}"
-HUMIDITY_CACHE: Dict[str, Tuple[float, Optional[float]]] = {}
-HUMIDITY_CACHE_TTL = 900
-HUMIDITY_BACKOFF_UNTIL = 0.0
-
-# #region agent log
-DEBUG_LOG_PATH = "/Users/phonlapaturairong/Downloads/Senior_Ontology-main 2/.cursor/debug-9bfe97.log"
-DEBUG_SESSION_ID = "9bfe97"
-
-def _agent_log(location: str, message: str, run_id: str, hypothesis_id: str, data: Optional[dict] = None):
-    payload = {
-        "sessionId": DEBUG_SESSION_ID,
-        "runId": run_id,
-        "hypothesisId": hypothesis_id,
-        "location": location,
-        "message": message,
-        "data": data or {},
-        "timestamp": int(time.time() * 1000),
-    }
-    try:
-        with open(DEBUG_LOG_PATH, "a", encoding="utf-8") as f:
-            f.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
-# #endregion
 
 async def fetch_aqi(client, lat, lon):
     key = cache_key(lat, lon)
@@ -184,7 +160,6 @@ def extract_pollutants(api):
     return out
 
 async def fetch_humidity(client, lat, lon):
-    global HUMIDITY_BACKOFF_UNTIL
     # TMD Weather Forecast API (NWPAPI) "hourly/at"
     # Docs example:
     # https://data.tmd.go.th/nwpapi/v1/forecast/hourly/at?lat=13.10&lon=100.10&fields=tc,rh&date=2017-08-17&hour=8&duration=2
@@ -193,23 +168,6 @@ async def fetch_humidity(client, lat, lon):
     hour = now_th.hour
 
     try:
-        h_key = cache_key(lat, lon)
-        now_ts = time.time()
-        if now_ts < HUMIDITY_BACKOFF_UNTIL:
-            return None
-        if h_key in HUMIDITY_CACHE:
-            ts, cached_rh = HUMIDITY_CACHE[h_key]
-            if now_ts - ts < HUMIDITY_CACHE_TTL:
-                return cached_rh
-        # #region agent log
-        _agent_log(
-            "server.py:fetch_humidity",
-            "humidity flow started",
-            run_id="initial",
-            hypothesis_id="H1",
-            data={"lat": lat, "lon": lon, "hasTmdTokenEnv": TMD_TOKEN_ENV is not None},
-        )
-        # #endregion
         # Keep one documented TMD endpoint only.
         tmd_url = (
             "https://data.tmd.go.th/nwpapi/v1/forecast/hourly/at"
@@ -229,16 +187,6 @@ async def fetch_humidity(client, lat, lon):
                 tmd_js = tmd_resp.json()
                 rh_val = tmd_js["WeatherForecasts"][0]["forecasts"][0]["data"]["rh"]
                 print(f"[Humidity] source=tmd lat={lat} lon={lon} rh={rh_val}")
-                HUMIDITY_CACHE[h_key] = (time.time(), float(rh_val))
-                # #region agent log
-                _agent_log(
-                    "server.py:fetch_humidity",
-                    "tmd success",
-                    run_id="initial",
-                    hypothesis_id="H2",
-                    data={"lat": lat, "lon": lon, "rh": rh_val},
-                )
-                # #endregion
                 return float(rh_val)
             except Exception as e:
                 print(f"[Humidity] source=tmd status=200 but invalid payload lat={lat} lon={lon}; err={e}")
@@ -247,15 +195,6 @@ async def fetch_humidity(client, lat, lon):
             print(
                 f"[Humidity] source=tmd status={tmd_resp.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'"
             )
-            # #region agent log
-            _agent_log(
-                "server.py:fetch_humidity",
-                "tmd non-200",
-                run_id="initial",
-                hypothesis_id="H3",
-                data={"lat": lat, "lon": lon, "status": tmd_resp.status_code, "bodySnip": body_snip[:180]},
-            )
-            # #endregion
 
         # Fallback source: Open-Meteo (keeps Dw usable when TMD endpoint/account is unavailable).
         # API docs: https://open-meteo.com/en/docs
@@ -271,20 +210,6 @@ async def fetch_humidity(client, lat, lon):
             if rf.status_code != 200:
                 body_snip = (rf.text or "")[:300].replace("\n", " ")
                 print(f"[Humidity] fallback status={rf.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'")
-                if rf.status_code == 429:
-                    # Provider quota exceeded: avoid hammering fallback endpoint repeatedly.
-                    # Backoff for 30 minutes to reduce repeated failures and log noise.
-                    HUMIDITY_BACKOFF_UNTIL = time.time() + 1800
-                HUMIDITY_CACHE[h_key] = (time.time(), None)
-                # #region agent log
-                _agent_log(
-                    "server.py:fetch_humidity",
-                    "fallback non-200",
-                    run_id="initial",
-                    hypothesis_id="H4",
-                    data={"lat": lat, "lon": lon, "status": rf.status_code, "bodySnip": body_snip[:180]},
-                )
-                # #endregion
                 return None
 
             jsf = rf.json()
@@ -300,25 +225,13 @@ async def fetch_humidity(client, lat, lon):
                 return None
 
             print(f"[Humidity] fallback source=open-meteo lat={lat} lon={lon} rh={rh_val}")
-            HUMIDITY_CACHE[h_key] = (time.time(), float(rh_val))
-            # #region agent log
-            _agent_log(
-                "server.py:fetch_humidity",
-                "fallback success",
-                run_id="initial",
-                hypothesis_id="H5",
-                data={"lat": lat, "lon": lon, "rh": rh_val},
-            )
-            # #endregion
             return float(rh_val)
         except Exception as fe:
             print(f"[Humidity] fallback request failed for lat={lat} lon={lon}: {fe}")
-            HUMIDITY_CACHE[h_key] = (time.time(), None)
             return None
     except Exception as e:
         # Avoid leaking the token; just report coordinates and error.
         print(f"[Humidity] request failed for lat={lat} lon={lon}: {e}")
-        HUMIDITY_CACHE[cache_key(lat, lon)] = (time.time(), None)
         return None
 
 def weather_score(rh: Optional[float]) -> int:

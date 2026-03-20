@@ -111,8 +111,6 @@ class _MapScreenState extends State<MapScreen> {
   DateTime? _lastRecalcRouteAt;
   static const Duration _recalcCooldown = Duration(seconds: 15);
   int _lastNavClosestIndex = 0;
-  bool _showRouteCompletedCard = false;
-  static const double _arrivalThresholdMeters = 100.0;
 
   /// Route info panel: true = maximized (default), false = minimized to see map
   bool _routePanelExpanded = true;
@@ -175,7 +173,6 @@ class _MapScreenState extends State<MapScreen> {
       setState(() => _navCurrentLocation = latLng);
       if (step == FlowStep.nav && routes.isNotEmpty) {
         _drawRoutesBasic();
-        _handleArrivalIfNeeded(latLng);
       }
       // #region agent log
       if (step == FlowStep.nav && routes.isNotEmpty) {
@@ -243,96 +240,6 @@ class _MapScreenState extends State<MapScreen> {
     _positionSubscription?.cancel();
     _positionSubscription = null;
     _navCurrentLocation = null;
-  }
-
-  void _handleArrivalIfNeeded(LatLng current) {
-    if (step != FlowStep.nav || routes.isEmpty || _showRouteCompletedCard || dest == null) return;
-    final safeIndex = chosenRoute.clamp(0, routes.length - 1);
-    final remainingMeters = distanceRemainingAlongRoute(
-      current,
-      routes[safeIndex].points,
-    );
-    final destinationRadiusMeters = Geolocator.distanceBetween(
-      current.latitude,
-      current.longitude,
-      dest!.latitude,
-      dest!.longitude,
-    );
-    // #region agent log
-    debugLog(
-      'map_screen.dart:_handleArrivalIfNeeded',
-      'arrival check',
-      runId: 'initial',
-      hypothesisId: 'H1',
-      data: {
-        'remainingMeters': remainingMeters,
-        'destinationRadiusMeters': destinationRadiusMeters,
-        'thresholdMeters': _arrivalThresholdMeters,
-        'alreadyShown': _showRouteCompletedCard,
-      },
-    );
-    // #endregion
-    final reachedByRoute = remainingMeters <= _arrivalThresholdMeters;
-    final reachedByRadius = destinationRadiusMeters <= _arrivalThresholdMeters;
-    if (reachedByRoute || reachedByRadius) {
-      _stopPositionStream();
-      if (!mounted) return;
-      setState(() => _showRouteCompletedCard = true);
-      // #region agent log
-      debugLog(
-        'map_screen.dart:_handleArrivalIfNeeded',
-        'arrival card shown',
-        runId: 'initial',
-        hypothesisId: 'H2',
-        data: {
-          'remainingMeters': remainingMeters,
-          'destinationRadiusMeters': destinationRadiusMeters,
-          'reachedByRoute': reachedByRoute,
-          'reachedByRadius': reachedByRadius,
-        },
-      );
-      // #endregion
-    }
-  }
-
-  void _resetToFirstPage() {
-    _stopPositionStream();
-    FocusScope.of(context).unfocus();
-    FocusManager.instance.primaryFocus?.unfocus();
-    // #region agent log
-    debugLog(
-      'map_screen.dart:_resetToFirstPage',
-      'reset to first page',
-      runId: 'initial',
-      hypothesisId: 'H3',
-      data: {
-        'hadOrigin': origin != null,
-        'hadDestination': dest != null,
-        'hadRoutes': routes.isNotEmpty,
-      },
-    );
-    // #endregion
-    setState(() {
-      startCtrl.clear();
-      endCtrl.clear();
-      origin = null;
-      dest = null;
-      routes.clear();
-      chosenRoute = 0;
-      travelTimes.clear();
-      routeScores.clear();
-      indicators.clear();
-      polys.clear();
-      marks.clear();
-      hasPollutionConcern = null;
-      showPollutionDialog = false;
-      showPollutantSelection = false;
-      selectedPollutants.clear();
-      loading = false;
-      step = FlowStep.choose;
-      _showRouteCompletedCard = false;
-      _routePanelExpanded = true;
-    });
   }
 
   /// Recalculate route from current location to destination (e.g. when user goes off-route).
@@ -439,10 +346,7 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
     if (!mounted) return;
-    setState(() {
-      step = FlowStep.nav;
-      _showRouteCompletedCard = false;
-    });
+    setState(() => step = FlowStep.nav);
     _drawRoutesBasic();
     // #region agent log
     debugLog(
@@ -1642,120 +1546,26 @@ class _MapScreenState extends State<MapScreen> {
                 _recalculateRouteFromCurrentLocation();
               },
               onExit: () {
+                // #region agent log
+                debugLog(
+                  'map_screen.dart:NavOverlay.onExit',
+                  'user tapped exit in nav overlay',
+                  runId: 'initial',
+                  hypothesisId: 'H4',
+                  data: {
+                    'stepBefore': step.name,
+                    'originText': startCtrl.text,
+                    'destText': endCtrl.text,
+                    'hasOrigin': origin != null,
+                    'hasDest': dest != null,
+                  },
+                );
+                // #endregion
                 _stopPositionStream();
                 FocusScope.of(context).unfocus();
                 FocusManager.instance.primaryFocus?.unfocus();
-                setState(() {
-                  step = FlowStep.choose;
-                  _showRouteCompletedCard = false;
-                });
+                setState(() => step = FlowStep.choose);
               },
-            ),
-
-          if (_showRouteCompletedCard)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 12,
-              left: 12,
-              right: 12,
-              child: Card(
-                color: const Color(0xFF111111),
-                elevation: 12,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              "Arriving at destination",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: _resetToFirstPage,
-                            tooltip: "Back to first page",
-                            icon: const Icon(Icons.close, color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          FilledButton.icon(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF0D8A81),
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              // #region agent log
-                              debugLog(
-                                'map_screen.dart:routeCompletedCard',
-                                'restart tapped',
-                                runId: 'initial',
-                                hypothesisId: 'H4',
-                              );
-                              // #endregion
-                              setState(() {
-                                _showRouteCompletedCard = false;
-                                step = FlowStep.nav;
-                              });
-                              _startPositionStream();
-                            },
-                            icon: const Icon(Icons.restart_alt),
-                            label: const Text("Restart"),
-                          ),
-                          FilledButton.icon(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.grey.shade800,
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              // #region agent log
-                              debugLog(
-                                'map_screen.dart:routeCompletedCard',
-                                'walk tapped',
-                                runId: 'initial',
-                                hypothesisId: 'H5',
-                              );
-                              // #endregion
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Walk mode selected.")),
-                              );
-                            },
-                            icon: const Icon(Icons.directions_walk),
-                            label: const Text("Walk"),
-                          ),
-                          FilledButton.icon(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.grey.shade800,
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Parking saved.")),
-                              );
-                            },
-                            icon: const Icon(Icons.local_parking),
-                            label: const Text("Save parking"),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
 
           if (loading) const Center(child: CircularProgressIndicator()),

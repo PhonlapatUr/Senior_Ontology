@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../models/route_info.dart';
 import '../utils/helpers.dart';
+import '../utils/debug_log.dart';
 
 class NavOverlay extends StatelessWidget {
   final RouteInfo route;
@@ -45,6 +46,21 @@ class NavOverlay extends StatelessWidget {
               )
             : "Follow the route");
     final eta = DateTime.now().add(Duration(seconds: durationRemainingSec));
+    // #region agent log
+    debugLog(
+      'nav_overlay.dart:build',
+      'nav overlay metrics',
+      runId: 'initial',
+      hypothesisId: 'H1',
+      data: {
+        'remainingMeters': remainingMeters,
+        'durationRemainingSec': durationRemainingSec,
+        'routeDistanceMeters': route.distanceMeters,
+        'routePoints': route.points.length,
+        'isArrivalThreshold': remainingMeters <= 200,
+      },
+    );
+    // #endregion
 
     const teal = Color(0xFF00796B);
     final mq = MediaQuery.of(context);
