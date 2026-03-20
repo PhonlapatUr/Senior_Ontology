@@ -273,19 +273,19 @@ async def fetch_humidity(client, lat, lon):
             if rf.status_code != 200:
                 body_snip = (rf.text or "")[:300].replace("\n", " ")
                 print(f"[Humidity] fallback status={rf.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'")
-                return None
+                raise RuntimeError(f"open-meteo status={rf.status_code}")
 
             jsf = rf.json()
             rh_list = ((jsf.get("hourly") or {}).get("relative_humidity_2m") or [])
             if not rh_list:
                 print(f"[Humidity] fallback missing hourly humidity for lat={lat} lon={lon}")
-                return None
+                raise RuntimeError("open-meteo missing hourly humidity")
 
             # Use first available value for current forecast window.
             rh_val = next((v for v in rh_list if v is not None), None)
             if rh_val is None:
                 print(f"[Humidity] fallback humidity list has no non-null values for lat={lat} lon={lon}")
-                return None
+                raise RuntimeError("open-meteo humidity list has no non-null values")
 
             print(f"[Humidity] fallback source=open-meteo lat={lat} lon={lon} rh={rh_val}")
             return float(rh_val)
