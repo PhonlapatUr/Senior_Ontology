@@ -184,6 +184,7 @@ def extract_pollutants(api):
     return out
 
 async def fetch_humidity(client, lat, lon):
+    global HUMIDITY_BACKOFF_UNTIL
     # TMD Weather Forecast API (NWPAPI) "hourly/at"
     # Docs example:
     # https://data.tmd.go.th/nwpapi/v1/forecast/hourly/at?lat=13.10&lon=100.10&fields=tc,rh&date=2017-08-17&hour=8&duration=2
@@ -273,7 +274,6 @@ async def fetch_humidity(client, lat, lon):
                 if rf.status_code == 429:
                     # Provider quota exceeded: avoid hammering fallback endpoint repeatedly.
                     # Backoff for 30 minutes to reduce repeated failures and log noise.
-                    global HUMIDITY_BACKOFF_UNTIL
                     HUMIDITY_BACKOFF_UNTIL = time.time() + 1800
                 HUMIDITY_CACHE[h_key] = (time.time(), None)
                 # #region agent log
