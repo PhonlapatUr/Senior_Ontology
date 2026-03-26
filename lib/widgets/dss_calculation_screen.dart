@@ -399,39 +399,23 @@ class DSSCalculationScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              LayoutBuilder(
-                                builder: (context, constraints) => FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: Alignment.centerLeft,
-                                  child: SizedBox(
-                                    width: constraints.maxWidth,
-                                    child: Text(
-                                      "Final Score = $equation",
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontFamily: 'monospace',
-                                      ),
-                                    ),
-                                  ),
+                              Text(
+                                "Final Score = $equation",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'monospace',
                                 ),
+                                softWrap: true,
                               ),
                               if (equationCalc.isNotEmpty) ...[
                                 const SizedBox(height: 8),
-                                LayoutBuilder(
-                                  builder: (context, constraints) => FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: SizedBox(
-                                      width: constraints.maxWidth,
-                                      child: Text(
-                                        equationCalc,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'monospace',
-                                        ),
-                                      ),
-                                    ),
+                                Text(
+                                  equationCalc,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'monospace',
                                   ),
+                                  softWrap: true,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(

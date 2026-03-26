@@ -78,10 +78,8 @@ class _SearchBoxState extends State<SearchBox> {
       final myLocationButton = IconButton(
         icon: const Icon(Icons.my_location, color: Color(0xFF26A69A)),
         onPressed: () {
-          // #region agent log
           debugLog('search_box.dart:MyLocation', 'My Location pressed',
               hypothesisId: 'H1', data: {'isOrigin': true});
-          // #endregion
           // Unfocus first so the patched google_places_flutter removes the suggestions overlay
           // on focus loss; then set "My Location" and resolve location.
           widget.focusNode?.unfocus();

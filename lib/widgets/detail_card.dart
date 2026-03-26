@@ -96,7 +96,6 @@ class DetailCard extends StatelessWidget {
     }
   }
 
-  // ---------------------- **API SCORE TABLE** ----------------------
   Widget _buildScoreTable(SafeScore? score) {
     if (score == null) {
       return const Text("No score available.");
@@ -264,13 +263,14 @@ class DetailCard extends StatelessWidget {
     );
   }
 
-  // ---------------------- BUILD ----------------------
   @override
   Widget build(BuildContext context) {
     final criticPoint = _calculateCriticPoint();
     final equation = _getEquation();
     final equationCalc = _getEquationCalculation();
     final finalScore = _getFinalScore();
+    final screenHeight = MediaQuery.of(context).size.height;
+    final cardHeight = (screenHeight * 0.56).clamp(380.0, 560.0);
     
     // Format selected pollutants
     String pollutionText = "None";
@@ -286,7 +286,7 @@ class DetailCard extends StatelessWidget {
       shadowColor: Colors.black.withOpacity(0.2),
       child: Container(
         padding: const EdgeInsets.all(20),
-        height: 520,
+        height: cardHeight,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
@@ -565,7 +565,6 @@ class DetailCard extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     color: _kMainTeal,
                                   ),
-                                  softWrap: true,
                                 ),
                               ),
                             ],
@@ -590,42 +589,24 @@ class DetailCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                LayoutBuilder(
-                                  builder: (context, constraints) => FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: SizedBox(
-                                      width: constraints.maxWidth,
-                                      child: Text(
-                                        "Final Score = $equation",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'monospace',
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        softWrap: true,
-                                      ),
-                                    ),
+                                Text(
+                                  "Final Score = $equation",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.w500,
                                   ),
+                                  softWrap: true,
                                 ),
                                 if (equationCalc.isNotEmpty) ...[
                                   const SizedBox(height: 8),
-                                  LayoutBuilder(
-                                    builder: (context, constraints) => FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      alignment: Alignment.centerLeft,
-                                      child: SizedBox(
-                                        width: constraints.maxWidth,
-                                        child: Text(
-                                          equationCalc,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: 'monospace',
-                                          ),
-                                          softWrap: true,
-                                        ),
-                                      ),
+                                  Text(
+                                    equationCalc,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: 'monospace',
                                     ),
+                                    softWrap: true,
                                   ),
                                   const SizedBox(height: 8),
                                   Container(
@@ -693,10 +674,10 @@ class DetailCard extends StatelessWidget {
                             child: Text(
                               finalScore.toStringAsFixed(3),
                               style: const TextStyle(
-                                fontSize: 56,
+                                fontSize: 44,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                letterSpacing: 2,
+                                letterSpacing: 1,
                               ),
                             ),
                           ),

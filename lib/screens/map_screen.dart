@@ -1,4 +1,3 @@
-// ========================= map_screen.dart =========================
 
 import 'dart:async';
 
@@ -6,10 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
-// NEW
 import '../models/route_request_item.dart';
-
-// widgets
 import '../widgets/search_box.dart';
 import '../widgets/route_list.dart';
 import '../widgets/detail_card.dart';
@@ -17,21 +13,15 @@ import '../widgets/dss_calculation_screen.dart';
 import '../widgets/preview_card.dart';
 import '../widgets/nav_overlay.dart';
 
-// screens
 import 'login_screen.dart';
 import 'welcome_screen.dart';
-
-// models
 import '../models/travel_time.dart';
 import '../models/route_info.dart';
 import '../models/safe_score.dart';
 import '../models/route_indicators.dart';
 
-// utils
 import '../utils/helpers.dart';
 import '../utils/debouncer.dart';
-
-// services
 import '../services/google_routes_service.dart';
 import '../services/geocode_service.dart';
 import '../services/backend_service.dart';
@@ -39,8 +29,6 @@ import '../services/ontology_service.dart';
 import '../services/auth_service.dart';
 import '../config/backend_config.dart';
 import '../utils/debug_log.dart';
-
-// CONFIG --------------------------------------------------------------
 
 const String googleApiKey = "AIzaSyDg3Gv6FLg7KT19XyEuJEMrMYAVP8sjU6Y";
 const Color _kMainTeal = Color(0xFF26A69A);
@@ -58,8 +46,6 @@ const List<String> _defaultPollutantList = [
 ];
 
 enum FlowStep { choose, detail, dssCalculation, preview, nav }
-
-// SCREEN --------------------------------------------------------------
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -101,7 +87,6 @@ class _MapScreenState extends State<MapScreen> {
 
   static const LatLng initCenter = LatLng(13.7563, 100.5018);
 
-  // In-app navigation: live position and stream
   StreamSubscription<Position>? _positionSubscription;
   LatLng? _navCurrentLocation;
   static const double _navZoom = 17.0;
@@ -121,26 +106,20 @@ class _MapScreenState extends State<MapScreen> {
   late final BackendService backend = BackendService(backendBase);
   final AuthService _authService = AuthService();
 
-  // INIT --------------------------------------------------------------
-
   @override
   void initState() {
     super.initState();
     startCtrl.addListener(() => _handleLatLngText(true));
     endCtrl.addListener(() => _handleLatLngText(false));
     focusOrigin.addListener(() {
-      // #region agent log
       if (focusOrigin.hasFocus) {
         debugLog('map_screen.dart:focusOrigin', 'Origin gained focus',
             hypothesisId: 'H3', data: {'hasFocus': true});
       }
-      // #endregion
     });
     focusDest.addListener(() {
-      // #region agent log
       debugLog('map_screen.dart:focusDest', 'Dest focus changed',
           hypothesisId: 'H3', data: {'hasFocus': focusDest.hasFocus});
-      // #endregion
     });
     _loadPollutants();
   }
@@ -174,8 +153,23 @@ class _MapScreenState extends State<MapScreen> {
       setState(() => _navCurrentLocation = latLng);
       if (step == FlowStep.nav && routes.isNotEmpty) {
         _drawRoutesBasic();
+        final currentRoute = routes[chosenRoute.clamp(0, routes.length - 1)];
+        final remainingMeters = distanceRemainingAlongRoute(latLng, currentRoute.points);
+        final totalMeters = currentRoute.distanceMeters > 0 ? currentRoute.distanceMeters.toDouble() : 1.0;
+        final durationRemainingSec = (remainingMeters / totalMeters * currentRoute.durationSec).round();
+        final destinationMeters = dest == null
+            ? double.infinity
+            : Geolocator.distanceBetween(
+                latLng.latitude,
+                latLng.longitude,
+                dest!.latitude,
+                dest!.longitude,
+              );
+        final arrived = durationRemainingSec <= 0 || remainingMeters <= 20 || destinationMeters <= 20;
+        if (arrived) {
+          _showArrivalDialog();
+        }
       }
-      // #region agent log
       if (step == FlowStep.nav && routes.isNotEmpty) {
         final navPoints = routes[chosenRoute.clamp(0, routes.length - 1)].points;
         final idx = _closestRoutePointIndex(latLng, navPoints);
@@ -204,19 +198,7 @@ class _MapScreenState extends State<MapScreen> {
             'isNearDestination200m': destinationMeters >= 0 && destinationMeters <= 200.0,
           },
         );
-        final route = routes[chosenRoute.clamp(0, routes.length - 1)];
-        final totalMeters = route.distanceMeters > 0 ? route.distanceMeters.toDouble() : 1.0;
-        final durationRemainingSec =
-            (remainingMeters / totalMeters * route.durationSec).round().clamp(0, 999999);
-        final arrived = durationRemainingSec == 0 ||
-            remainingMeters <= 20.0 ||
-            (destinationMeters >= 0 && destinationMeters <= 20.0);
-        if (arrived && !_arrivalDialogShown) {
-          _arrivalDialogShown = true;
-          _showArrivedDialog();
-        }
       }
-      // #endregion
       mapCtrl?.animateCamera(
         CameraUpdate.newLatLngZoom(latLng, _navZoom),
       );
@@ -229,7 +211,6 @@ class _MapScreenState extends State<MapScreen> {
         final distToRoute = distanceToRoute(latLng, routePoints);
         final cooldownPassed = _lastRecalcRouteAt == null ||
             DateTime.now().difference(_lastRecalcRouteAt!) > _recalcCooldown;
-        // #region agent log
         debugLog(
           'map_screen.dart:_startPositionStream',
           'off-route check',
@@ -242,9 +223,7 @@ class _MapScreenState extends State<MapScreen> {
             'isRecalculating': _isRecalculatingRoute,
           },
         );
-        // #endregion
         if (distToRoute > _offRouteThresholdMeters && cooldownPassed) {
-          // #region agent log
           debugLog(
             'map_screen.dart:_startPositionStream',
             'trigger auto-reroute',
@@ -254,7 +233,6 @@ class _MapScreenState extends State<MapScreen> {
               'distToRouteMeters': distToRoute,
             },
           );
-          // #endregion
           _recalculateRouteFromCurrentLocation();
         }
       }
@@ -273,6 +251,8 @@ class _MapScreenState extends State<MapScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       step = FlowStep.choose;
+      _routePanelExpanded = true;
+      _arrivalDialogShown = false;
       startCtrl.clear();
       endCtrl.clear();
       origin = null;
@@ -282,45 +262,48 @@ class _MapScreenState extends State<MapScreen> {
       showPollutantSelection = false;
       selectedPollutants.clear();
       routes.clear();
-      chosenRoute = 0;
       indicators.clear();
       routeScores.clear();
       polys.clear();
       marks.clear();
-      _arrivalDialogShown = false;
     });
   }
 
-  void _showArrivedDialog() {
-    if (!mounted) return;
+  void _showArrivalDialog() {
+    if (!mounted || _arrivalDialogShown) return;
+    _arrivalDialogShown = true;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) {
+      builder: (ctx) {
         return AlertDialog(
+          titlePadding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
           title: Row(
             children: [
-              const Expanded(child: Text("You arrived")),
+              const Expanded(
+                child: Text(
+                  "You arrived",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
               IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: "Back to first page",
                 onPressed: () {
-                  Navigator.of(dialogContext).pop();
+                  Navigator.of(ctx).pop();
                   _resetToFirstPage();
                 },
-                icon: const Icon(Icons.close),
-                tooltip: "Close",
               ),
             ],
           ),
-          content: const Text(
-            "You have arrived at your destination.",
-          ),
+          content: const Text("You have reached your destination."),
           actions: [
-            FilledButton(
+            TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop();
+                Navigator.of(ctx).pop();
                 _resetToFirstPage();
               },
-              child: const Text("Back to start"),
+              child: const Text("Back to first page"),
             ),
           ],
         );
@@ -332,7 +315,6 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _recalculateRouteFromCurrentLocation() async {
     if (_isRecalculatingRoute || !mounted || dest == null || _navCurrentLocation == null) return;
     _isRecalculatingRoute = true;
-    // #region agent log
     debugLog(
       'map_screen.dart:_recalculateRouteFromCurrentLocation',
       'reroute started',
@@ -344,7 +326,6 @@ class _MapScreenState extends State<MapScreen> {
         'mode': selectedMode,
       },
     );
-    // #endregion
     if (mounted) setState(() => loading = true);
     try {
       final newRoutes = await gRoutes.getRoutes(
@@ -358,7 +339,6 @@ class _MapScreenState extends State<MapScreen> {
         chosenRoute = 0;
         origin = _navCurrentLocation;
       });
-      // #region agent log
       debugLog(
         'map_screen.dart:_recalculateRouteFromCurrentLocation',
         'reroute fetched routes',
@@ -368,7 +348,6 @@ class _MapScreenState extends State<MapScreen> {
           'newRouteCount': newRoutes.length,
         },
       );
-      // #endregion
       await _scoreAllRoutes();
       _lastRecalcRouteAt = DateTime.now();
       if (mounted) {
@@ -383,7 +362,6 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     } catch (e) {
-      // #region agent log
       debugLog(
         'map_screen.dart:_recalculateRouteFromCurrentLocation',
         'reroute failed',
@@ -391,7 +369,6 @@ class _MapScreenState extends State<MapScreen> {
         hypothesisId: 'H7',
         data: {'error': e.toString()},
       );
-      // #endregion
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -437,7 +414,6 @@ class _MapScreenState extends State<MapScreen> {
       _arrivalDialogShown = false;
     });
     _drawRoutesBasic();
-    // #region agent log
     debugLog(
       'map_screen.dart:_startNavigation',
       'navigation started',
@@ -449,7 +425,6 @@ class _MapScreenState extends State<MapScreen> {
         'routeCount': routes.length,
       },
     );
-    // #endregion
     mapCtrl?.animateCamera(
       CameraUpdate.newLatLngZoom(live, _navZoom),
     );
@@ -509,10 +484,8 @@ class _MapScreenState extends State<MapScreen> {
 
     // Show pollution concern dialog if not asked yet
     if (hasPollutionConcern == null) {
-      // #region agent log
       debugLog('map_screen.dart:_onEndpointsUpdated', 'setState showPollutionDialog',
           hypothesisId: 'H2', data: {'hasPollutionConcern': null});
-      // #endregion
       setState(() => showPollutionDialog = true);
       return;
     }
@@ -520,10 +493,8 @@ class _MapScreenState extends State<MapScreen> {
     // If user selected pollutants, don't fetch here (will be fetched in _handlePollutantSelectionComplete)
     // Only fetch if user clicked "No" (no concern)
     if (hasPollutionConcern == false) {
-      // #region agent log
       debugLog('map_screen.dart:_onEndpointsUpdated', 'setState loading=true',
           hypothesisId: 'H2', data: {'loading': true});
-      // #endregion
       setState(() {
         loading = true;
         step = FlowStep.choose;
@@ -535,10 +506,8 @@ class _MapScreenState extends State<MapScreen> {
         print("Error in _onEndpointsUpdated: $e");
       } finally {
         if (mounted) {
-          // #region agent log
           debugLog('map_screen.dart:_onEndpointsUpdated', 'setState loading=false',
               hypothesisId: 'H2', data: {'loading': false});
-          // #endregion
           setState(() => loading = false);
         }
       }
@@ -593,27 +562,21 @@ class _MapScreenState extends State<MapScreen> {
     // Dismiss keyboard and unfocus location fields so only the dialog shows (no search/autocomplete)
     FocusScope.of(context).unfocus();
     FocusManager.instance.primaryFocus?.unfocus();
-    // #region agent log
     debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'entry',
         hypothesisId: 'H1', data: {'mounted': mounted});
-    // #endregion
     final listToShow = availablePollutants.isEmpty
         ? _defaultPollutantList
         : availablePollutants;
     final selectedInDialog = Set<String>.from(selectedPollutants);
-    // #region agent log
     debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'before showDialog',
         hypothesisId: 'H2', data: {'listLength': listToShow.length});
-    // #endregion
     try {
       showDialog<void>(
         context: context,
         useRootNavigator: true,
         builder: (ctx) {
-          // #region agent log
           debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'builder called',
               hypothesisId: 'H3', data: {});
-          // #endregion
           return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
@@ -748,10 +711,8 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
     } catch (e, st) {
-      // #region agent log
       debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'exception',
           hypothesisId: 'H5', data: {'error': e.toString(), 'stack': st.toString().split('\n').take(3).join(' ')});
-      // #endregion
       rethrow;
     }
   }
@@ -843,7 +804,6 @@ class _MapScreenState extends State<MapScreen> {
         useOntology =
             true; // Enable ontology-based adjustments for better scoring
       }
-      // #region agent log
       debugLog(
         'map_screen.dart:_scoreAllRoutes',
         'score parameters',
@@ -857,7 +817,6 @@ class _MapScreenState extends State<MapScreen> {
           'useOntology': useOntology,
         },
       );
-      // #endregion
 
       // Call backend API to calculate DSS scores with selected pollutants
       print("Connecting to: $backendBase");
@@ -869,7 +828,6 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       routeScores = scores;
-      // #region agent log
       debugLog(
         'map_screen.dart:_scoreAllRoutes',
         'score success',
@@ -879,7 +837,6 @@ class _MapScreenState extends State<MapScreen> {
           'scoreCount': scores.length,
         },
       );
-      // #endregion
 
       _ensureScoreExists();
       _computeIndicators();
@@ -1060,7 +1017,6 @@ class _MapScreenState extends State<MapScreen> {
           zIndex: 2,
         ),
       );
-      // #region agent log
       debugLog(
         'map_screen.dart:_drawRoutesBasic',
         'nav polyline split',
@@ -1073,7 +1029,6 @@ class _MapScreenState extends State<MapScreen> {
           'remainingPoints': remainingPoints.length,
         },
       );
-      // #endregion
     } else {
       polys.add(
         Polyline(
@@ -1608,7 +1563,6 @@ class _MapScreenState extends State<MapScreen> {
               route: routes[safeIndex],
               currentLocation: _navCurrentLocation ?? origin,
               destination: dest,
-              onArrivedClose: _resetToFirstPage,
               onRecenter: () {
                 final center = _navCurrentLocation ?? origin;
                 if (center != null && mapCtrl != null) {
@@ -1636,7 +1590,6 @@ class _MapScreenState extends State<MapScreen> {
                 _recalculateRouteFromCurrentLocation();
               },
               onExit: () {
-                // #region agent log
                 debugLog(
                   'map_screen.dart:NavOverlay.onExit',
                   'exit navigation tapped',
@@ -1648,12 +1601,12 @@ class _MapScreenState extends State<MapScreen> {
                     'destinationText': endCtrl.text,
                   },
                 );
-                // #endregion
                 _stopPositionStream();
                 FocusScope.of(context).unfocus();
                 FocusManager.instance.primaryFocus?.unfocus();
                 setState(() => step = FlowStep.choose);
               },
+              onResetToFirstPage: _resetToFirstPage,
             ),
 
           if (loading) const Center(child: CircularProgressIndicator()),

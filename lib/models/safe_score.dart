@@ -1,18 +1,13 @@
-// models/safe_score.dart
-
 class SafeScore {
   final String id;
 
-  // Route decision values
   final double di;
   final double dt;
   final double dp;
   final double dw;
 
-  // Final score from API
   final double riskScore;
 
-  // Additional values
   final double avgHumidity;
   final bool weatherValid;
   final int pointsSampled;

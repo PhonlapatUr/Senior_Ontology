@@ -1,0 +1,14 @@
+[run]
+branch = False
+source =
+    backend_tests
+omit =
+    backend_tests/htmlcov/*
+
+[report]
+show_missing = True
+skip_empty = True
+precision = 0
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:

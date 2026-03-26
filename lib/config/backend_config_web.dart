@@ -1,4 +1,3 @@
-// Used when running on web (no dart:io).
 const String _prodUrl = String.fromEnvironment(
   'BACKEND_URL',
   defaultValue: '',

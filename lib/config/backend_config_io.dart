@@ -1,4 +1,3 @@
-// Used when running on Android, iOS, or desktop (dart:io available).
 import 'dart:io' show Platform;
 
 /// Production URL: set at build time with --dart-define=BACKEND_URL=https://your-server.com

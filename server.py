@@ -12,9 +12,7 @@ from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-# ============================================================
 # CONFIG & API KEYS
-# ============================================================
 
 GOOGLE_API_KEY = os.getenv(
     "GOOGLE_API_KEY",
@@ -33,7 +31,6 @@ TMD_TOKEN = TMD_TOKEN_ENV or (
 if TMD_TOKEN_ENV is None:
     print("[TMD] WARNING: `TMD_TOKEN` env var not set. Using placeholder token; humidity requests will likely fail.")
 
-# #region agent log
 _DEBUG_LOG_PATH = os.path.join(os.path.dirname(__file__), ".cursor", "debug-9bfe97.log")
 
 def _agent_debug_log(location: str, message: str, run_id: str, hypothesis_id: str, data: dict):
@@ -51,7 +48,6 @@ def _agent_debug_log(location: str, message: str, run_id: str, hypothesis_id: st
             f.write(json.dumps(payload, ensure_ascii=True) + "\n")
     except Exception:
         pass
-# #endregion
 
 
 USER_DB_PATH = "Key.json"  
@@ -65,9 +61,7 @@ AQ_CACHE_TTL = 300
 CRITERIA = ["pm2.5", "pm10", "co", "no2", "o3", "so2"]
 POLLUTANTS_ALLOWED = ["pm2.5", "pm10", "co", "no2", "o3", "so2"]
 
-# ============================================================
 # MODELS
-# ============================================================
 
 # --- User Management Models ---
 class UserRegister(BaseModel):
@@ -117,9 +111,7 @@ class ScoreResult(BaseModel):
 class ScoreResponse(BaseModel):
     scores: List[ScoreResult]
 
-# ============================================================
 # USER MANAGEMENT HELPERS (File Operations)
-# ============================================================
 
 def read_users():
     if not os.path.exists(USER_DB_PATH):
@@ -134,9 +126,7 @@ def save_users(users):
     with open(USER_DB_PATH, "w", encoding="utf-8") as f:
         json.dump(users, f, indent=4, ensure_ascii=False)
 
-# ============================================================
 # DSS HELPERS & EXTERNAL API FETCHERS
-# ============================================================
 
 def decode_poly(encoded: str):
     if not encoded: return []
@@ -183,14 +173,10 @@ def extract_pollutants(api):
     return out
 
 async def fetch_humidity(client, lat, lon):
-    # TMD Weather Forecast API (NWPAPI) "hourly/at"
-    # Docs example:
-    # https://data.tmd.go.th/nwpapi/v1/forecast/hourly/at?lat=13.10&lon=100.10&fields=tc,rh&date=2017-08-17&hour=8&duration=2
     now_th = datetime.now(timezone(timedelta(hours=7)))
     date_str = now_th.strftime("%Y-%m-%d")
     hour = now_th.hour
 
-    # #region agent log
     token_raw = os.getenv("TMD_TOKEN")
     token_trimmed = (token_raw or "").strip()
     _agent_debug_log(
@@ -207,7 +193,6 @@ async def fetch_humidity(client, lat, lon):
             "hourBangkok": hour,
         },
     )
-    # #endregion
     try:
         # Cache humidity per rounded point so repeated requests don't hammer providers on Render.
         h_key = cache_key(lat, lon)
@@ -218,7 +203,6 @@ async def fetch_humidity(client, lat, lon):
                 print(f"[Humidity] cache hit lat={lat} lon={lon} rh={rh_cached}")
                 return float(rh_cached)
 
-        # Keep one documented TMD endpoint only.
         tmd_url = (
             "https://data.tmd.go.th/nwpapi/v1/forecast/hourly/at"
             f"?lat={lat}&lon={lon}&fields=tc,rh&date={date_str}&hour={hour}&duration=2"
@@ -231,7 +215,6 @@ async def fetch_humidity(client, lat, lon):
             },
             timeout=HTTP_TIMEOUT,
         )
-        # #region agent log
         _agent_debug_log(
             "server.py:fetch_humidity:tmd_response",
             "tmd response received",
@@ -243,7 +226,6 @@ async def fetch_humidity(client, lat, lon):
                 "bodySnippet": (tmd_resp.text or "")[:120].replace("\n", " "),
             },
         )
-        # #endregion
 
         if tmd_resp.status_code == 200:
             try:
@@ -260,8 +242,6 @@ async def fetch_humidity(client, lat, lon):
                 f"[Humidity] source=tmd status={tmd_resp.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'"
             )
 
-        # Fallback source #1: Open-Meteo (keeps Dw usable when TMD endpoint/account is unavailable).
-        # API docs: https://open-meteo.com/en/docs
         try:
             global OPEN_METEO_BACKOFF_UNTIL
             if time.time() < OPEN_METEO_BACKOFF_UNTIL:
@@ -274,7 +254,6 @@ async def fetch_humidity(client, lat, lon):
                 "&timezone=Asia%2FBangkok"
             )
             rf = await client.get(fallback_url, timeout=HTTP_TIMEOUT)
-            # #region agent log
             _agent_debug_log(
                 "server.py:fetch_humidity:fallback_response",
                 "fallback response received",
@@ -285,7 +264,6 @@ async def fetch_humidity(client, lat, lon):
                     "bodySnippet": (rf.text or "")[:120].replace("\n", " "),
                 },
             )
-            # #endregion
             if rf.status_code != 200:
                 body_snip = (rf.text or "")[:300].replace("\n", " ")
                 print(f"[Humidity] fallback status={rf.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'")
@@ -299,7 +277,6 @@ async def fetch_humidity(client, lat, lon):
                 print(f"[Humidity] fallback missing hourly humidity for lat={lat} lon={lon}")
                 raise RuntimeError("open-meteo missing hourly humidity")
 
-            # Use first available value for current forecast window.
             rh_val = next((v for v in rh_list if v is not None), None)
             if rh_val is None:
                 print(f"[Humidity] fallback humidity list has no non-null values for lat={lat} lon={lon}")
@@ -310,8 +287,7 @@ async def fetch_humidity(client, lat, lon):
             return float(rh_val)
         except Exception as fe:
             print(f"[Humidity] fallback request failed for lat={lat} lon={lon}: {fe}")
-        # Fallback source #2: MET Norway Locationforecast (no API key, requires User-Agent).
-        # Docs: https://api.met.no/weatherapi/locationforecast/2.0/documentation
+
         try:
             met_url = (
                 "https://api.met.no/weatherapi/locationforecast/2.0/compact"
@@ -325,7 +301,6 @@ async def fetch_humidity(client, lat, lon):
                 },
                 timeout=HTTP_TIMEOUT,
             )
-            # #region agent log
             _agent_debug_log(
                 "server.py:fetch_humidity:metno_response",
                 "met.no response received",
@@ -336,7 +311,6 @@ async def fetch_humidity(client, lat, lon):
                     "bodySnippet": (rm.text or "")[:120].replace("\n", " "),
                 },
             )
-            # #endregion
             if rm.status_code != 200:
                 body_snip = (rm.text or "")[:300].replace("\n", " ")
                 print(f"[Humidity] fallback2 status={rm.status_code} lat={lat} lon={lon}; body_snip='{body_snip}'")
@@ -361,7 +335,6 @@ async def fetch_humidity(client, lat, lon):
             print(f"[Humidity] fallback2 request failed for lat={lat} lon={lon}: {fe2}")
             return None
     except Exception as e:
-        # Avoid leaking the token; just report coordinates and error.
         print(f"[Humidity] request failed for lat={lat} lon={lon}: {e}")
         return None
 
@@ -371,9 +344,7 @@ def weather_score(rh: Optional[float]) -> int:
     elif rh < 40: return 1
     return 2
 
-# ============================================================
 # DSS LOGIC (CRITIC, SCORING, ONTOLOGY)
-# ============================================================
 
 def critic_weights(data: pd.DataFrame) -> dict:
     if data.empty or len(data) < 2:
@@ -457,9 +428,7 @@ def evaluate_route(route_data, max_vals, critic_w, g_mean, g_std, avg_poll, weat
     }
 
 
-# ============================================================
 # ONTOLOGY ADJUSTMENT (Notebook port)
-# ============================================================
 
 _ONTOLOGY_MAPS_CACHE: Optional[Tuple[dict, dict]] = None
 
@@ -505,7 +474,6 @@ def _get_ontology_maps():
                 src_name = local_name(src)
                 pollutant_sources.setdefault(pol_name, set()).add(src_name)
 
-    # src -> types for HumanSources/NaturalSources classes
     human_cls = AP.HumanSources
     natural_cls = AP.NaturalSources
 
@@ -643,9 +611,7 @@ def apply_ontology_adjustment(results: list, pollutant_sources: dict, source_typ
 
     return adjusted
 
-# ============================================================
 # FASTAPI APP
-# ============================================================
 
 app = FastAPI(title="Smart Route & User Management API")
 
@@ -786,7 +752,6 @@ async def score_routes(req: ScoreRequest):
                 }
                 scores.append(base_score_result)
 
-        # Optional ontology adjustment (not used by the current tests but matches the notebook).
         if req.use_ontology:
             pollutant_sources, source_types = _get_ontology_maps()
             adjusted = apply_ontology_adjustment(scores, pollutant_sources, source_types, penalty_max=0.30)

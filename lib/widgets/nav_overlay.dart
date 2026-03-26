@@ -10,7 +10,7 @@ class NavOverlay extends StatelessWidget {
   final LatLng? currentLocation;
   final LatLng? destination;
   final VoidCallback onExit;
-  final VoidCallback? onArrivedClose;
+  final VoidCallback? onResetToFirstPage;
   final VoidCallback? onRecenter;
   final VoidCallback? onZoomIn;
   final VoidCallback? onZoomOut;
@@ -23,7 +23,7 @@ class NavOverlay extends StatelessWidget {
     required this.currentLocation,
     required this.destination,
     required this.onExit,
-    this.onArrivedClose,
+    this.onResetToFirstPage,
     this.onRecenter,
     this.onZoomIn,
     this.onZoomOut,
@@ -47,11 +47,7 @@ class NavOverlay extends StatelessWidget {
                 route.points.last,
               )
             : "Follow the route");
-    final safeRemainingMeters = remainingMeters < 0 ? 0.0 : remainingMeters;
-    final safeDurationRemainingSec = durationRemainingSec < 0 ? 0 : durationRemainingSec;
-    final eta = DateTime.now().add(Duration(seconds: safeDurationRemainingSec));
-    final hasArrived = safeDurationRemainingSec == 0 || safeRemainingMeters <= 20.0;
-    // #region agent log
+    final eta = DateTime.now().add(Duration(seconds: durationRemainingSec));
     debugLog(
       'nav_overlay.dart:build',
       'navigation overlay computed values',
@@ -64,7 +60,6 @@ class NavOverlay extends StatelessWidget {
         'isNear200m': remainingMeters <= 200.0,
       },
     );
-    // #endregion
 
     const teal = Color(0xFF00796B);
     final mq = MediaQuery.of(context);
@@ -75,9 +70,7 @@ class NavOverlay extends StatelessWidget {
 
     return Stack(
       children: [
-        // --------------------------------------------------
         // TOP-LEFT: Instruction box (↑ toward ...) – responsive
-        // --------------------------------------------------
         Positioned(
           top: padding.top + 12,
           left: horizontalInset,
@@ -108,7 +101,7 @@ class NavOverlay extends StatelessWidget {
                 SizedBox(width: (width * 0.025).clamp(8.0, 14.0)),
                 Expanded(
                   child: Text(
-                    hasArrived ? "You have arrived" : "toward $instruction",
+                    "toward $instruction",
                     style: TextStyle(
                       fontSize: instructionFontSize,
                       color: Colors.white,
@@ -116,14 +109,21 @@ class NavOverlay extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: onResetToFirstPage ?? onExit,
+                  borderRadius: BorderRadius.circular(16),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.close, color: Colors.white, size: 22),
+                  ),
+                ),
               ],
             ),
           ),
         ),
 
-        // --------------------------------------------------
         // RIGHT: Map controls – responsive inset
-        // --------------------------------------------------
         Positioned(
           top: padding.top + 94,
           right: horizontalInset,
@@ -148,9 +148,7 @@ class NavOverlay extends StatelessWidget {
           ),
         ),
 
-        // --------------------------------------------------
         // BOTTOM: Dark bar – time (green + clock + leaf), distance, ETA, route options, Exit, Re-center
-        // --------------------------------------------------
         Positioned(
           left: 0,
           right: 0,
@@ -192,7 +190,7 @@ class NavOverlay extends StatelessWidget {
                             ),
                             SizedBox(width: (width * 0.015).clamp(4.0, 8.0)),
                             Text(
-                              formatDurationShort(safeDurationRemainingSec),
+                              formatDurationShort(durationRemainingSec),
                               style: TextStyle(
                                 fontSize: (width * 0.045).clamp(14.0, 20.0),
                                 fontWeight: FontWeight.bold,
@@ -205,7 +203,7 @@ class NavOverlay extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              prettyKm(safeRemainingMeters.round()),
+                              prettyKm(remainingMeters.round()),
                               style: TextStyle(
                                 fontSize: (width * 0.032).clamp(11.0, 14.0),
                                 color: Colors.white70,
@@ -224,54 +222,26 @@ class NavOverlay extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Arrival close button ("X") or Exit button
-                  if (hasArrived)
-                    Material(
-                      color: Colors.red.shade600,
+                  // Exit button (red)
+                  Material(
+                    color: Colors.red.shade600,
+                    borderRadius: BorderRadius.circular(10),
+                    child: InkWell(
+                      onTap: onExit,
                       borderRadius: BorderRadius.circular(10),
-                      child: InkWell(
-                        onTap: onArrivedClose ?? onExit,
-                        borderRadius: BorderRadius.circular(10),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.close, color: Colors.white, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                "Close",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    Material(
-                      color: Colors.red.shade600,
-                      borderRadius: BorderRadius.circular(10),
-                      child: InkWell(
-                        onTap: onExit,
-                        borderRadius: BorderRadius.circular(10),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          child: Text(
-                            "Exit",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        child: Text(
+                          "Exit",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ),
+                  ),
                   const SizedBox(width: 12),
                   // Re-center: triangle + "Re-center"
                   if (onRecenter != null)

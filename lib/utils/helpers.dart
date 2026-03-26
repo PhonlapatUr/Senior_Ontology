@@ -66,7 +66,7 @@ String formatArrivalTime(DateTime dt) {
 
 String formatDistanceShort(int meters) {
   if (meters < 1000) {
-    return "${meters} M";
+    return "${meters} m";
   }
   return "${(meters / 1000).toStringAsFixed(1)} km";
 }
