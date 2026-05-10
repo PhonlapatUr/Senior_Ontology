@@ -1,0 +1,12 @@
+Context diagram — four test modules (1.0–4.0)
+============================================
+
+1.0  UnitTest_1_0_User_Registration.py  +  UnitTest_1_0_User_Registration.pdf
+2.0  UnitTest_2_0_Login.py              +  UnitTest_2_0_Login.pdf
+3.0  UnitTest_3_0_Route_No_Pollution_Preference.py  +  .pdf
+4.0  UnitTest_4_0_Route_With_Pollution_Preference.py + .pdf
+
+Fixture: dfd_route_fixtures.py
+Run tests + coverage: ./backend_tests/run_coverage.sh
+
+See CONTEXT_DIAGRAM_TEST_GUIDE.md for the full mapping table.
