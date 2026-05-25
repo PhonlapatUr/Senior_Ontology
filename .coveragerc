@@ -1,10 +1,10 @@
 [run]
 branch = False
 source =
-    backend_tests
+    unit_test
 omit =
-    backend_tests/htmlcov/*
-    backend_tests/dfd_route_fixtures.py
+    unit_test/htmlcov/*
+    unit_test/dfd_route_fixtures.py
 
 [report]
 show_missing = True

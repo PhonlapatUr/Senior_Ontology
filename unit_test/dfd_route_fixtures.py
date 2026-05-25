@@ -10,8 +10,6 @@ def asyncio_run(coro):
 
 
 def score_routes_fixture():
-    """Polyline sample points, mocked AQI payload, mocked humidity — matches origin/destination encoded route in app."""
-
     def decode_poly(_encoded: str):
         return [(10.0, 20.0), (10.1, 20.1)]
 

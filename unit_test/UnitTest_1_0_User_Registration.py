@@ -50,7 +50,8 @@ class UnitTest_1_0_User_Registration(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(row["lastname"], "L")
         self.assertEqual(row["email"], "reg1@example.com")
         self.assertEqual(row["phonenum"], "081")
-        self.assertEqual(row["password"], "secret")
+        self.assertTrue(row["password"].startswith("$2"))
+        self.assertTrue(api.verify_stored_password("secret", row["password"]))
 
     async def test_dfd_1_2_check_existing_user_duplicate(self) -> None:
         """1.2 — Duplicate email rejected before persist."""
@@ -132,7 +133,7 @@ class UnitTest_1_0_User_Registration(unittest.IsolatedAsyncioTestCase):
         with patch.object(api, "read_users", new=_read_users), patch.object(api, "save_users", new=_save_users):
             out2 = await api.change_password(ok)
         self.assertIn("Password updated", out2["message"])
-        self.assertEqual(store["users"][0]["password"], "newpw")
+        self.assertTrue(api.verify_stored_password("newpw", store["users"][0]["password"]))
 
 
 if __name__ == "__main__":  # pragma: no cover

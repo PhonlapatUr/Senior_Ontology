@@ -4,8 +4,7 @@ The **context diagram** defines four top-level capabilities **1.0–4.0**. Backe
 
 ## 1.0 User registration
 
-**Module:** `backend_tests/UnitTest_1_0_User_Registration.py`  
-**PDF:** `backend_tests/UnitTest_1_0_User_Registration.pdf` — layout matches `UnitTest_User_Login_Validation.pdf` (header, scope note, metadata, DFD text, Step/Action/Expected/Status table, trace table, footer). Edit PDFs directly if specifications change.
+**Module:** `unit_test/UnitTest_1_0_User_Registration.py`
 
 | DFD | Coverage |
 |-----|----------|
@@ -15,8 +14,7 @@ The **context diagram** defines four top-level capabilities **1.0–4.0**. Backe
 
 ## 2.0 Login
 
-**Module:** `backend_tests/UnitTest_2_0_Login.py`  
-**PDF:** `backend_tests/UnitTest_2_0_Login.pdf`
+**Module:** `unit_test/UnitTest_2_0_Login.py`
 
 | DFD | Coverage |
 |-----|----------|
@@ -26,9 +24,8 @@ The **context diagram** defines four top-level capabilities **1.0–4.0**. Backe
 
 ## 3.0 Find a route with no pollution preference
 
-**Module:** `backend_tests/UnitTest_3_0_Route_No_Pollution_Preference.py`  
-**Fixture:** `backend_tests/dfd_route_fixtures.py`  
-**PDF:** `backend_tests/UnitTest_3_0_Route_No_Pollution_Preference.pdf`
+**Module:** `unit_test/UnitTest_3_0_Route_No_Pollution_Preference.py`  
+**Fixture:** `unit_test/dfd_route_fixtures.py`
 
 | DFD | Coverage |
 |-----|----------|
@@ -39,8 +36,7 @@ The **context diagram** defines four top-level capabilities **1.0–4.0**. Backe
 
 ## 4.0 Find a route with pollution preference
 
-**Module:** `backend_tests/UnitTest_4_0_Route_With_Pollution_Preference.py`  
-**PDF:** `backend_tests/UnitTest_4_0_Route_With_Pollution_Preference.pdf`
+**Module:** `unit_test/UnitTest_4_0_Route_With_Pollution_Preference.py`
 
 | DFD | Coverage |
 |-----|----------|
@@ -50,4 +46,4 @@ The **context diagram** defines four top-level capabilities **1.0–4.0**. Backe
 
 ## Commands
 
-- Run all four modules: `./backend_tests/run_coverage.sh`
+- Run all four modules: `./unit_test/run_coverage.sh`

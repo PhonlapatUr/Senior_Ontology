@@ -9,10 +9,10 @@ cd "$ROOT_DIR"
 echo "Running unit tests with verbose output..."
 "$PYTHON_BIN" -m coverage erase
 "$PYTHON_BIN" -m coverage run -m unittest -v \
-  backend_tests/UnitTest_1_0_User_Registration.py \
-  backend_tests/UnitTest_2_0_Login.py \
-  backend_tests/UnitTest_3_0_Route_No_Pollution_Preference.py \
-  backend_tests/UnitTest_4_0_Route_With_Pollution_Preference.py
+  unit_test/UnitTest_1_0_User_Registration.py \
+  unit_test/UnitTest_2_0_Login.py \
+  unit_test/UnitTest_3_0_Route_No_Pollution_Preference.py \
+  unit_test/UnitTest_4_0_Route_With_Pollution_Preference.py
 
 echo
 echo "Coverage summary:"
@@ -20,5 +20,5 @@ echo "Coverage summary:"
 
 echo
 echo "Generating HTML coverage report..."
-"$PYTHON_BIN" -m coverage html -d backend_tests/htmlcov
-echo "HTML report: backend_tests/htmlcov/index.html"
+"$PYTHON_BIN" -m coverage html -d unit_test/htmlcov
+echo "HTML report: unit_test/htmlcov/index.html"

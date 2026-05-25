@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import os, asyncio, time, json
+import os, asyncio, time, json, hmac
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 
+import bcrypt
 import httpx
 import polyline as gpoly
 import numpy as np
@@ -131,6 +132,22 @@ class ScoreResponse(BaseModel):
     scores: List[ScoreResult]
 
 # USER MANAGEMENT HELPERS (File Operations)
+
+def hash_password(plain: str) -> str:
+    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode("utf-8")
+
+
+def verify_stored_password(plain: str, stored: str) -> bool:
+    if stored.startswith("$2"):
+        try:
+            return bcrypt.checkpw(plain.encode("utf-8"), stored.encode("utf-8"))
+        except ValueError:
+            return False
+    pe, se = plain.encode("utf-8"), stored.encode("utf-8")
+    if len(pe) != len(se):
+        return False
+    return hmac.compare_digest(pe, se)
+
 
 def read_users():
     if not os.path.exists(USER_DB_PATH):
@@ -724,7 +741,9 @@ async def signup(user: UserRegister):
     users = read_users()
     if any(u['email'].lower() == user.email.lower() for u in users):
         raise HTTPException(status_code=400, detail="Email already registered")
-    users.append(user.dict())
+    rec = user.model_dump()
+    rec["password"] = hash_password(rec["password"])
+    users.append(rec)
     save_users(users)
     print(f"✅ User Signup: {user.email}")
     return {"message": "User created"}
@@ -734,7 +753,10 @@ async def signup(user: UserRegister):
 async def login(req: LoginRequest):
     users = read_users()
     for u in users:
-        if u['email'].lower() == req.email.lower() and u['password'] == req.password:
+        if u['email'].lower() == req.email.lower() and verify_stored_password(req.password, u['password']):
+            if not str(u['password']).startswith("$2"):
+                u['password'] = hash_password(req.password)
+                save_users(users)
             print(f"🔑 User Login: {u['email']}")
             return {"message": "Success", "user": {"firstname": u['firstname'], "email": u['email']}}
     raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -745,9 +767,9 @@ async def change_password(req: ChangePasswordRequest):
     users = read_users()
     for u in users:
         if u['email'].lower() == req.email.lower():
-            if u['password'] != req.old_password:
+            if not verify_stored_password(req.old_password, u['password']):
                 raise HTTPException(status_code=401, detail="Old password is incorrect")
-            u['password'] = req.new_password
+            u['password'] = hash_password(req.new_password)
             save_users(users)
             print(f"🔒 Password changed: {u['email']}")
             return {"message": "Password updated successfully"}
