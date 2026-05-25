@@ -15,8 +15,10 @@ A Flutter-based mobile application that helps users find the safest and most opt
 ### 2) Open Project
 
 ```bash
-cd "/Users/phonlapaturairong/Downloads/Senior_Ontology-main-fixing"
+cd "/Users/<your-username>/Downloads/Senior_Ontology-main-fixing"
 ```
+
+Use your own local path to the project directory.
 
 ### 3) Start Backend Server
 
@@ -84,7 +86,6 @@ Build app with deployed backend URL:
 
 ```bash
 flutter build apk --dart-define=BACKEND_URL=https://your-server-url
-flutter build ios --dart-define=BACKEND_URL=https://your-server-url
 ```
 
 Production must use HTTPS.
