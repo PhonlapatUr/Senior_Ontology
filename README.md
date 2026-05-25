@@ -15,7 +15,7 @@ A Flutter-based mobile application that helps users find the safest and most opt
 ### 2) Open Project
 
 ```bash
-cd "/Users/<your-username>/Downloads/Senior_Ontology-main-fixing"
+cd "<your-username>/Senior_Ontology-main-fixing"
 ```
 
 Use your own local path to the project directory.
