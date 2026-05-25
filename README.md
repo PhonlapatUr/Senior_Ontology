@@ -32,8 +32,10 @@ Backend runs at:
 
 ```bash
 flutter pub get
-flutter run -d emulator-5554
-# or
+flutter run -d <your-emulator-or-device-id>
+# Use your own emulator/device ID from: flutter devices
+# Example only: flutter run -d emulator-5554
+# and then
 flutter run
 ```
 
