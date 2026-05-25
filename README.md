@@ -1,7 +1,3 @@
-# Smart Route Finder
-
-A Flutter-based mobile application that helps users find the safest and most optimal routes by analyzing pollution levels, weather conditions, distance, and travel time using a Decision Support System (DSS).
-
 ## Manual
 
 ### 1) Prerequisites
