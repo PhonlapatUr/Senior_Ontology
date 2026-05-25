@@ -25,7 +25,6 @@ uvicorn server:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Backend runs at:
-- `http://127.0.0.1:8000` (desktop)
 - `http://10.0.2.2:8000` (Android emulator)
 
 ### 4) Run Flutter App
