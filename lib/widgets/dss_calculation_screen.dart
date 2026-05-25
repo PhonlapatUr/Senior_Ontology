@@ -28,23 +28,15 @@ class DSSCalculationScreen extends StatelessWidget {
     required this.onNext,
     this.onAddPollutionConcern,
   });
-
-  // Calculate CRITIC point from pollution score
   double _calculateCriticPoint() {
     if (score == null) return 0.0;
-    // CRITIC point is the pollution score (1 - dp gives us the pollution risk)
-    // The higher the dp, the lower the pollution risk, so CRITIC = 1 - dp
     return (1.0 - score!.dp).clamp(0.0, 1.0);
   }
 
-  // Get equation weights based on available data
   String _getEquation() {
     if (score == null) return "0.30 * Di + 0.30 * Dt + 0.30 * Dp + 0.10 * Dw";
-    
-    // Check if pollution and weather data are available
-    bool hasPollution = score!.dp != 0.5; // 0.5 is the neutral/default value
+    bool hasPollution = score!.dp != 0.5;
     bool hasWeather = score!.weatherValid;
-    
     if (!hasPollution && !hasWeather) {
       return "0.50 * Di + 0.50 * Dt";
     } else if (hasWeather && !hasPollution) {
@@ -56,13 +48,10 @@ class DSSCalculationScreen extends StatelessWidget {
     }
   }
 
-  // Get equation calculation with actual values
   String _getEquationCalculation() {
     if (score == null) return "";
-    
     bool hasPollution = score!.dp != 0.5;
     bool hasWeather = score!.weatherValid;
-    
     if (!hasPollution && !hasWeather) {
       return "Final Score = (0.50 * ${score!.di.toStringAsFixed(3)}) + (0.50 * ${score!.dt.toStringAsFixed(3)})";
     } else if (hasWeather && !hasPollution) {
@@ -74,13 +63,12 @@ class DSSCalculationScreen extends StatelessWidget {
     }
   }
 
-  // Get final score calculation result
   double _getFinalScore() {
     if (score == null) return 0.0;
-    
+
     bool hasPollution = score!.dp != 0.5;
     bool hasWeather = score!.weatherValid;
-    
+
     if (!hasPollution && !hasWeather) {
       return (0.50 * score!.di) + (0.50 * score!.dt);
     } else if (hasWeather && !hasPollution) {
@@ -88,7 +76,10 @@ class DSSCalculationScreen extends StatelessWidget {
     } else if (hasPollution && !hasWeather) {
       return (0.30 * score!.di) + (0.30 * score!.dt) + (0.40 * score!.dp);
     } else {
-      return (0.30 * score!.di) + (0.30 * score!.dt) + (0.30 * score!.dp) + (0.10 * score!.dw);
+      return (0.30 * score!.di) +
+          (0.30 * score!.dt) +
+          (0.30 * score!.dp) +
+          (0.10 * score!.dw);
     }
   }
 
@@ -98,8 +89,6 @@ class DSSCalculationScreen extends StatelessWidget {
     final equation = _getEquation();
     final equationCalc = _getEquationCalculation();
     final finalScore = _getFinalScore();
-    
-    // Format selected pollutants
     String pollutionText = "None";
     if (selectedPollutants.isNotEmpty) {
       final pollutants = selectedPollutants.toList()..sort();
@@ -111,7 +100,6 @@ class DSSCalculationScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Navigation Bar
             Container(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -137,7 +125,11 @@ class DSSCalculationScreen extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: TextField(
-                                controller: TextEditingController(text: originLabel.isEmpty ? "Your Location" : originLabel),
+                                controller: TextEditingController(
+                                  text: originLabel.isEmpty
+                                      ? "Your Location"
+                                      : originLabel,
+                                ),
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
                                   isDense: true,
@@ -162,7 +154,9 @@ class DSSCalculationScreen extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: TextField(
-                                controller: TextEditingController(text: destinationLabel),
+                                controller: TextEditingController(
+                                  text: destinationLabel,
+                                ),
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
                                   isDense: true,
@@ -186,14 +180,12 @@ class DSSCalculationScreen extends StatelessWidget {
               ),
             ),
 
-            // Main Content
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Decision Support System Calculation Title
                     const Text(
                       "Decision Support System Calculation:",
                       style: TextStyle(
@@ -204,7 +196,6 @@ class DSSCalculationScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Pollution Concerns
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -226,7 +217,10 @@ class DSSCalculationScreen extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     TextButton(
                                       onPressed: onAddPollutionConcern,
-                                      child: const Text("Add", style: TextStyle(fontSize: 13)),
+                                      child: const Text(
+                                        "Add",
+                                        style: TextStyle(fontSize: 13),
+                                      ),
                                     ),
                                   ],
                                 ],
@@ -250,7 +244,6 @@ class DSSCalculationScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // CRITIC point
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -284,8 +277,6 @@ class DSSCalculationScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
-
-                    // Real-time Factor Scores Table
                     const Text(
                       "Real-time Factor Scores:",
                       style: TextStyle(
@@ -308,7 +299,6 @@ class DSSCalculationScreen extends StatelessWidget {
                         },
                         border: TableBorder.all(color: Colors.grey.shade300),
                         children: [
-                          // Header row
                           TableRow(
                             decoration: BoxDecoration(
                               color: Colors.grey.shade100,
@@ -331,7 +321,10 @@ class DSSCalculationScreen extends StatelessWidget {
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 12,
+                                ),
                                 child: Text(
                                   "Normalized",
                                   style: TextStyle(
@@ -344,25 +337,17 @@ class DSSCalculationScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          // Di: Distance
                           _buildTableRow(
                             "Di: Distance",
                             score?.di ?? 0.0,
                             true,
                           ),
-                          // Dt: Time
-                          _buildTableRow(
-                            "Dt: Time",
-                            score?.dt ?? 0.0,
-                            true,
-                          ),
-                          // Dp: Pollution
+                          _buildTableRow("Dt: Time", score?.dt ?? 0.0, true),
                           _buildTableRow(
                             "Dp: Pollution",
                             score?.dp ?? 0.0,
                             (score?.dp ?? 0.0) != 0.5,
                           ),
-                          // Dw: Weather
                           _buildTableRow(
                             "Dw: Weather",
                             score?.dw ?? 0.0,
@@ -373,7 +358,6 @@ class DSSCalculationScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Equation for Route Evaluation
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -434,7 +418,6 @@ class DSSCalculationScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
 
-                    // Route Score Section
                     const Text(
                       "Route Score:",
                       style: TextStyle(
@@ -455,10 +438,7 @@ class DSSCalculationScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     const Text(
                       "(Your route score is calculated based on pollution concerns, which affect the ontology score and the CRITIC score, as well as the DSS equation that is used to evaluate your route.)",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(height: 32),
                     SizedBox(
@@ -497,10 +477,7 @@ class DSSCalculationScreen extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(12),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-          ),
+          child: Text(label, textAlign: TextAlign.center),
         ),
         Padding(
           padding: const EdgeInsets.all(12),
@@ -512,10 +489,7 @@ class DSSCalculationScreen extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          child: Text(
-            value.toStringAsFixed(3),
-            textAlign: TextAlign.center,
-          ),
+          child: Text(value.toStringAsFixed(3), textAlign: TextAlign.center),
         ),
       ],
     );

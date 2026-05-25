@@ -52,7 +52,7 @@ class PollutionPanel extends StatelessWidget {
                     color: isSelected ? Colors.white : const Color(0xFF424242),
                   ),
                 ),
-                selectedColor: const Color(0xFF26A69A), // main teal
+                selectedColor: const Color(0xFF26A69A),
                 backgroundColor: const Color(0xFFE0E0E0),
                 onSelected: (v) => onChange(p, v),
               );

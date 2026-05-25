@@ -15,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _isLoading = false;
   final _authService = AuthService();
@@ -23,7 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Add listeners to text fields to update button state
     _emailController.addListener(_updateButtonState);
     _passwordController.addListener(_updateButtonState);
   }
@@ -38,10 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _updateButtonState() {
-    setState(() {}); // Trigger rebuild to update button state
+    setState(() {});
   }
 
-  // Check if both email and password are filled
   bool _areFieldsValid() {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -62,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final password = _passwordController.text;
 
       final isValid = await _authService.verifyCredentials(email, password);
-      
+
       if (isValid) {
         if (mounted) {
           Navigator.pushReplacement(
@@ -83,10 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -108,7 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Decorative wave pattern at top
             Positioned(
               top: 0,
               left: 0,
@@ -118,8 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 painter: WavePainter(),
               ),
             ),
-            
-            // Main content
+
             LayoutBuilder(
               builder: (context, constraints) {
                 final width = MediaQuery.of(context).size.width;
@@ -137,191 +130,203 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Padding(
                     padding: EdgeInsets.zero,
                     child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Welcome Back text
-                      const Text(
-                        "Welcome Back!",
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: tealColor,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 40),
-                      
-                      // Illustration placeholder (responsive)
-                      Center(
-                        child: Container(
-                          width: illustrationSize,
-                          height: illustrationSize,
-                          decoration: BoxDecoration(
-                            color: tealColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Icon(
-                            Icons.login,
-                            size: illustrationSize * 0.5,
-                            color: tealColor,
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 40),
-                      
-                      // Email field
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._-]')),
-                        ],
-                        decoration: InputDecoration(
-                          labelText: "Email",
-                          helperText: "Enter a valid email address (e.g., user@gmail.com)",
-                          helperMaxLines: 1,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: tealColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: tealColor),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: tealColor, width: 2),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!value.contains('@') || !value.contains('.')) {
-                            return 'Please enter a valid email address';
-                          }
-                          // More strict email validation
-                          final emailRegex = RegExp(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                          if (!emailRegex.hasMatch(value)) {
-                            return 'Please enter a valid email address';
-                          }
-                          return null;
-                        },
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // Password field
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: tealColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: tealColor),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: tealColor, width: 2),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Welcome Back!",
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
                               color: tealColor,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
+                          ),
+
+                          const SizedBox(height: 40),
+                          Center(
+                            child: Container(
+                              width: illustrationSize,
+                              height: illustrationSize,
+                              decoration: BoxDecoration(
+                                color: tealColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Icon(
+                                Icons.login,
+                                size: illustrationSize * 0.5,
+                                color: tealColor,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[a-zA-Z0-9@._-]'),
+                              ),
+                            ],
+                            decoration: InputDecoration(
+                              labelText: "Email",
+                              helperText:
+                                  "Enter a valid email address (e.g., user@gmail.com)",
+                              helperMaxLines: 1,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: tealColor),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: tealColor),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: tealColor,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              if (!value.contains('@') ||
+                                  !value.contains('.')) {
+                                return 'Please enter a valid email address';
+                              }
+                              final emailRegex = RegExp(
+                                r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                              );
+                              if (!emailRegex.hasMatch(value)) {
+                                return 'Please enter a valid email address';
+                              }
+                              return null;
                             },
                           ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          return null;
-                        },
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // Forget Password link
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ForgetPasswordScreen(),
+
+                          const SizedBox(height: 16),
+
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              labelText: "Password",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: tealColor),
                               ),
-                            );
-                          },
-                          child: const Text(
-                            "Forget Password?",
-                            style: TextStyle(
-                              color: tealColor,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Login button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: (_isLoading || !_areFieldsValid()) ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: tealColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            disabledBackgroundColor: Colors.grey.shade300,
-                            disabledForegroundColor: Colors.grey.shade600,
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : const Text(
-                                  "Login",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: tealColor),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: tealColor,
+                                  width: 2,
                                 ),
-                        ),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: tealColor,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ForgetPasswordScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Forget Password?",
+                                style: TextStyle(
+                                  color: tealColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: (_isLoading || !_areFieldsValid())
+                                  ? null
+                                  : _handleLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: tealColor,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                disabledBackgroundColor: Colors.grey.shade300,
+                                disabledForegroundColor: Colors.grey.shade600,
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    )
+                                  : const Text(
+                                      "Login",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          SizedBox(height: (height * 0.04).clamp(24.0, 48.0)),
+                        ],
                       ),
-                      
-                      SizedBox(height: (height * 0.04).clamp(24.0, 48.0)),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
+                );
               },
             ),
-            
-            // Back button - placed last so it's on top
+
             Positioned(
               top: 10,
               left: 0,
@@ -354,7 +359,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// Reuse wave painter
 class WavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -365,19 +369,23 @@ class WavePainter extends CustomPainter {
     final path = Path();
     path.moveTo(0, size.height * 0.6);
     path.quadraticBezierTo(
-      size.width * 0.25, size.height * 0.4,
-      size.width * 0.5, size.height * 0.6,
+      size.width * 0.25,
+      size.height * 0.4,
+      size.width * 0.5,
+      size.height * 0.6,
     );
     path.quadraticBezierTo(
-      size.width * 0.75, size.height * 0.8,
-      size.width, size.height * 0.6,
+      size.width * 0.75,
+      size.height * 0.8,
+      size.width,
+      size.height * 0.6,
     );
     path.lineTo(size.width, 0);
     path.lineTo(0, 0);
     path.close();
 
     canvas.drawPath(path, paint);
-    
+
     final paint2 = Paint()
       ..color = const Color(0xFF26A69A)
       ..style = PaintingStyle.fill;
@@ -385,12 +393,16 @@ class WavePainter extends CustomPainter {
     final path2 = Path();
     path2.moveTo(0, size.height * 0.7);
     path2.quadraticBezierTo(
-      size.width * 0.3, size.height * 0.5,
-      size.width * 0.6, size.height * 0.7,
+      size.width * 0.3,
+      size.height * 0.5,
+      size.width * 0.6,
+      size.height * 0.7,
     );
     path2.quadraticBezierTo(
-      size.width * 0.9, size.height * 0.9,
-      size.width, size.height * 0.7,
+      size.width * 0.9,
+      size.height * 0.9,
+      size.width,
+      size.height * 0.7,
     );
     path2.lineTo(size.width, 0);
     path2.lineTo(0, 0);

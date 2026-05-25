@@ -96,9 +96,9 @@ class GoogleRoutesService {
     for (final rt in data) {
       final enc = rt["polyline"]["encodedPolyline"];
 
-      final points = PolylinePoints().decodePolyline(enc)
-          .map((e) => LatLng(e.latitude, e.longitude))
-          .toList();
+      final points = PolylinePoints.decodePolyline(
+        enc,
+      ).map((e) => LatLng(e.latitude, e.longitude)).toList();
 
       list.add(
         RouteInfo(

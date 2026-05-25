@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -33,7 +32,6 @@ import '../utils/debug_log.dart';
 const String googleApiKey = "AIzaSyDg3Gv6FLg7KT19XyEuJEMrMYAVP8sjU6Y";
 const Color _kMainTeal = Color(0xFF26A69A);
 
-/// Default pollutant list for "Your concern about pollution" when ontology is not yet loaded.
 const List<String> _defaultPollutantList = [
   'CO',
   'NO2',
@@ -67,7 +65,7 @@ class _MapScreenState extends State<MapScreen> {
 
   bool loading = false;
   FlowStep step = FlowStep.choose;
-  bool? hasPollutionConcern; // null = not asked yet, true = yes, false = no
+  bool? hasPollutionConcern;
   bool showPollutionDialog = false;
   bool showPollutantSelection = false;
   List<String> availablePollutants = [];
@@ -90,7 +88,6 @@ class _MapScreenState extends State<MapScreen> {
   StreamSubscription<Position>? _positionSubscription;
   LatLng? _navCurrentLocation;
   static const double _navZoom = 17.0;
-  /// If user is farther than this (meters) from the route, trigger recalc.
   static const double _offRouteThresholdMeters = 80.0;
   bool _isRecalculatingRoute = false;
   DateTime? _lastRecalcRouteAt;
@@ -98,7 +95,6 @@ class _MapScreenState extends State<MapScreen> {
   int _lastNavClosestIndex = 0;
   bool _arrivalDialogShown = false;
 
-  /// Route info panel: true = maximized (default), false = minimized to see map
   bool _routePanelExpanded = true;
 
   late final GoogleRoutesService gRoutes = GoogleRoutesService(googleApiKey);
@@ -113,13 +109,21 @@ class _MapScreenState extends State<MapScreen> {
     endCtrl.addListener(() => _handleLatLngText(false));
     focusOrigin.addListener(() {
       if (focusOrigin.hasFocus) {
-        debugLog('map_screen.dart:focusOrigin', 'Origin gained focus',
-            hypothesisId: 'H3', data: {'hasFocus': true});
+        debugLog(
+          'map_screen.dart:focusOrigin',
+          'Origin gained focus',
+          hypothesisId: 'H3',
+          data: {'hasFocus': true},
+        );
       }
     });
     focusDest.addListener(() {
-      debugLog('map_screen.dart:focusDest', 'Dest focus changed',
-          hypothesisId: 'H3', data: {'hasFocus': focusDest.hasFocus});
+      debugLog(
+        'map_screen.dart:focusDest',
+        'Dest focus changed',
+        hypothesisId: 'H3',
+        data: {'hasFocus': focusDest.hasFocus},
+      );
     });
     _loadPollutants();
   }
@@ -145,98 +149,113 @@ class _MapScreenState extends State<MapScreen> {
       accuracy: LocationAccuracy.high,
       distanceFilter: 10,
     );
-    _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: locationSettings,
-    ).listen((Position position) {
-      if (!mounted) return;
-      final latLng = LatLng(position.latitude, position.longitude);
-      setState(() => _navCurrentLocation = latLng);
-      if (step == FlowStep.nav && routes.isNotEmpty) {
-        _drawRoutesBasic();
-        final currentRoute = routes[chosenRoute.clamp(0, routes.length - 1)];
-        final remainingMeters = distanceRemainingAlongRoute(latLng, currentRoute.points);
-        final totalMeters = currentRoute.distanceMeters > 0 ? currentRoute.distanceMeters.toDouble() : 1.0;
-        final durationRemainingSec = (remainingMeters / totalMeters * currentRoute.durationSec).round();
-        final destinationMeters = dest == null
-            ? double.infinity
-            : Geolocator.distanceBetween(
-                latLng.latitude,
-                latLng.longitude,
-                dest!.latitude,
-                dest!.longitude,
+    _positionSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: locationSettings,
+        ).listen((Position position) {
+          if (!mounted) return;
+          final latLng = LatLng(position.latitude, position.longitude);
+          setState(() => _navCurrentLocation = latLng);
+          if (step == FlowStep.nav && routes.isNotEmpty) {
+            _drawRoutesBasic();
+            final currentRoute =
+                routes[chosenRoute.clamp(0, routes.length - 1)];
+            final remainingMeters = distanceRemainingAlongRoute(
+              latLng,
+              currentRoute.points,
+            );
+            final totalMeters = currentRoute.distanceMeters > 0
+                ? currentRoute.distanceMeters.toDouble()
+                : 1.0;
+            final durationRemainingSec =
+                (remainingMeters / totalMeters * currentRoute.durationSec)
+                    .round();
+            final destinationMeters = dest == null
+                ? double.infinity
+                : Geolocator.distanceBetween(
+                    latLng.latitude,
+                    latLng.longitude,
+                    dest!.latitude,
+                    dest!.longitude,
+                  );
+            final arrived =
+                durationRemainingSec <= 0 ||
+                remainingMeters <= 20 ||
+                destinationMeters <= 20;
+            if (arrived) {
+              _showArrivalDialog();
+            }
+          }
+          if (step == FlowStep.nav && routes.isNotEmpty) {
+            final navPoints =
+                routes[chosenRoute.clamp(0, routes.length - 1)].points;
+            final idx = _closestRoutePointIndex(latLng, navPoints);
+            final remainingMeters = distanceRemainingAlongRoute(
+              latLng,
+              navPoints,
+            );
+            final destinationMeters = dest == null
+                ? -1.0
+                : Geolocator.distanceBetween(
+                    latLng.latitude,
+                    latLng.longitude,
+                    dest!.latitude,
+                    dest!.longitude,
+                  );
+            debugLog(
+              'map_screen.dart:_startPositionStream',
+              'position update',
+              runId: 'initial',
+              hypothesisId: 'H5',
+              data: {
+                'lat': position.latitude,
+                'lng': position.longitude,
+                'closestIdx': idx,
+                'routePoints': navPoints.length,
+                'remainingMeters': remainingMeters,
+                'destinationMeters': destinationMeters,
+                'isNear200m': remainingMeters <= 200.0,
+                'isNearDestination200m':
+                    destinationMeters >= 0 && destinationMeters <= 200.0,
+              },
+            );
+          }
+          mapCtrl?.animateCamera(CameraUpdate.newLatLngZoom(latLng, _navZoom));
+          if (step == FlowStep.nav &&
+              routes.isNotEmpty &&
+              dest != null &&
+              !_isRecalculatingRoute) {
+            final routePoints =
+                routes[chosenRoute.clamp(0, routes.length - 1)].points;
+            final distToRoute = distanceToRoute(latLng, routePoints);
+            final cooldownPassed =
+                _lastRecalcRouteAt == null ||
+                DateTime.now().difference(_lastRecalcRouteAt!) >
+                    _recalcCooldown;
+            debugLog(
+              'map_screen.dart:_startPositionStream',
+              'off-route check',
+              runId: 'initial',
+              hypothesisId: 'H6',
+              data: {
+                'distToRouteMeters': distToRoute,
+                'thresholdMeters': _offRouteThresholdMeters,
+                'cooldownPassed': cooldownPassed,
+                'isRecalculating': _isRecalculatingRoute,
+              },
+            );
+            if (distToRoute > _offRouteThresholdMeters && cooldownPassed) {
+              debugLog(
+                'map_screen.dart:_startPositionStream',
+                'trigger auto-reroute',
+                runId: 'initial',
+                hypothesisId: 'H6',
+                data: {'distToRouteMeters': distToRoute},
               );
-        final arrived = durationRemainingSec <= 0 || remainingMeters <= 20 || destinationMeters <= 20;
-        if (arrived) {
-          _showArrivalDialog();
-        }
-      }
-      if (step == FlowStep.nav && routes.isNotEmpty) {
-        final navPoints = routes[chosenRoute.clamp(0, routes.length - 1)].points;
-        final idx = _closestRoutePointIndex(latLng, navPoints);
-        final remainingMeters = distanceRemainingAlongRoute(latLng, navPoints);
-        final destinationMeters = dest == null
-            ? -1.0
-            : Geolocator.distanceBetween(
-                latLng.latitude,
-                latLng.longitude,
-                dest!.latitude,
-                dest!.longitude,
-              );
-        debugLog(
-          'map_screen.dart:_startPositionStream',
-          'position update',
-          runId: 'initial',
-          hypothesisId: 'H5',
-          data: {
-            'lat': position.latitude,
-            'lng': position.longitude,
-            'closestIdx': idx,
-            'routePoints': navPoints.length,
-            'remainingMeters': remainingMeters,
-            'destinationMeters': destinationMeters,
-            'isNear200m': remainingMeters <= 200.0,
-            'isNearDestination200m': destinationMeters >= 0 && destinationMeters <= 200.0,
-          },
-        );
-      }
-      mapCtrl?.animateCamera(
-        CameraUpdate.newLatLngZoom(latLng, _navZoom),
-      );
-      // Off-route: recalculate from current location to destination
-      if (step == FlowStep.nav &&
-          routes.isNotEmpty &&
-          dest != null &&
-          !_isRecalculatingRoute) {
-        final routePoints = routes[chosenRoute.clamp(0, routes.length - 1)].points;
-        final distToRoute = distanceToRoute(latLng, routePoints);
-        final cooldownPassed = _lastRecalcRouteAt == null ||
-            DateTime.now().difference(_lastRecalcRouteAt!) > _recalcCooldown;
-        debugLog(
-          'map_screen.dart:_startPositionStream',
-          'off-route check',
-          runId: 'initial',
-          hypothesisId: 'H6',
-          data: {
-            'distToRouteMeters': distToRoute,
-            'thresholdMeters': _offRouteThresholdMeters,
-            'cooldownPassed': cooldownPassed,
-            'isRecalculating': _isRecalculatingRoute,
-          },
-        );
-        if (distToRoute > _offRouteThresholdMeters && cooldownPassed) {
-          debugLog(
-            'map_screen.dart:_startPositionStream',
-            'trigger auto-reroute',
-            runId: 'initial',
-            hypothesisId: 'H6',
-            data: {
-              'distToRouteMeters': distToRoute,
-            },
-          );
-          _recalculateRouteFromCurrentLocation();
-        }
-      }
-    });
+              _recalculateRouteFromCurrentLocation();
+            }
+          }
+        });
   }
 
   void _stopPositionStream() {
@@ -311,9 +330,12 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  /// Recalculate route from current location to destination (e.g. when user goes off-route).
   Future<void> _recalculateRouteFromCurrentLocation() async {
-    if (_isRecalculatingRoute || !mounted || dest == null || _navCurrentLocation == null) return;
+    if (_isRecalculatingRoute ||
+        !mounted ||
+        dest == null ||
+        _navCurrentLocation == null)
+      return;
     _isRecalculatingRoute = true;
     debugLog(
       'map_screen.dart:_recalculateRouteFromCurrentLocation',
@@ -344,9 +366,7 @@ class _MapScreenState extends State<MapScreen> {
         'reroute fetched routes',
         runId: 'initial',
         hypothesisId: 'H7',
-        data: {
-          'newRouteCount': newRoutes.length,
-        },
+        data: {'newRouteCount': newRoutes.length},
       );
       await _scoreAllRoutes();
       _lastRecalcRouteAt = DateTime.now();
@@ -383,7 +403,6 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  /// Start in-app navigation for the route the user selected. Only allowed when start location is "My Location".
   Future<void> _startNavigation() async {
     if (startCtrl.text != "My Location") {
       if (mounted) {
@@ -402,7 +421,9 @@ class _MapScreenState extends State<MapScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Location unavailable. Enable location and try again."),
+            content: Text(
+              "Location unavailable. Enable location and try again.",
+            ),
           ),
         );
       }
@@ -425,13 +446,9 @@ class _MapScreenState extends State<MapScreen> {
         'routeCount': routes.length,
       },
     );
-    mapCtrl?.animateCamera(
-      CameraUpdate.newLatLngZoom(live, _navZoom),
-    );
+    mapCtrl?.animateCamera(CameraUpdate.newLatLngZoom(live, _navZoom));
     _startPositionStream();
   }
-
-  // INPUT HANDLING ----------------------------------------------------
 
   void _handleLatLngText(bool isOrigin) {
     final text = isOrigin ? startCtrl.text : endCtrl.text;
@@ -444,14 +461,12 @@ class _MapScreenState extends State<MapScreen> {
     final ll = parseLatLng(text);
     if (ll != null) {
       if (isOrigin) {
-        // Reset pollution concern if origin changes
         if (origin != ll) {
           hasPollutionConcern = null;
           selectedPollutants.clear();
         }
         origin = ll;
       } else {
-        // Reset pollution concern if destination changes
         if (dest != ll) {
           hasPollutionConcern = null;
           selectedPollutants.clear();
@@ -481,20 +496,24 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _onEndpointsUpdated() async {
     if (origin == null || dest == null) return;
-
-    // Show pollution concern dialog if not asked yet
     if (hasPollutionConcern == null) {
-      debugLog('map_screen.dart:_onEndpointsUpdated', 'setState showPollutionDialog',
-          hypothesisId: 'H2', data: {'hasPollutionConcern': null});
+      debugLog(
+        'map_screen.dart:_onEndpointsUpdated',
+        'setState showPollutionDialog',
+        hypothesisId: 'H2',
+        data: {'hasPollutionConcern': null},
+      );
       setState(() => showPollutionDialog = true);
       return;
     }
 
-    // If user selected pollutants, don't fetch here (will be fetched in _handlePollutantSelectionComplete)
-    // Only fetch if user clicked "No" (no concern)
     if (hasPollutionConcern == false) {
-      debugLog('map_screen.dart:_onEndpointsUpdated', 'setState loading=true',
-          hypothesisId: 'H2', data: {'loading': true});
+      debugLog(
+        'map_screen.dart:_onEndpointsUpdated',
+        'setState loading=true',
+        hypothesisId: 'H2',
+        data: {'loading': true},
+      );
       setState(() {
         loading = true;
         step = FlowStep.choose;
@@ -506,8 +525,12 @@ class _MapScreenState extends State<MapScreen> {
         print("Error in _onEndpointsUpdated: $e");
       } finally {
         if (mounted) {
-          debugLog('map_screen.dart:_onEndpointsUpdated', 'setState loading=false',
-              hypothesisId: 'H2', data: {'loading': false});
+          debugLog(
+            'map_screen.dart:_onEndpointsUpdated',
+            'setState loading=false',
+            hypothesisId: 'H2',
+            data: {'loading': false},
+          );
           setState(() => loading = false);
         }
       }
@@ -516,14 +539,12 @@ class _MapScreenState extends State<MapScreen> {
 
   void _handlePollutionConcern(bool concern) {
     if (concern) {
-      // Show pollutant selection dialog
       setState(() {
         showPollutionDialog = false;
         showPollutantSelection = true;
         selectedPollutants.clear();
       });
     } else {
-      // No concern, proceed directly
       setState(() {
         hasPollutionConcern = false;
         showPollutionDialog = false;
@@ -537,14 +558,13 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       hasPollutionConcern = selectedPollutants.isNotEmpty;
       showPollutantSelection = false;
-      loading = true; // Show loading while fetching routes and calculating DSS
+      loading = true;
       step = FlowStep.choose;
     });
 
     await _recalculateRoutesWithCurrentPollutants();
   }
 
-  /// Re-fetch and re-score routes using current selectedPollutants (e.g. after adding a concern).
   Future<void> _recalculateRoutesWithCurrentPollutants() async {
     try {
       await _fetchTravelTimes();
@@ -559,160 +579,187 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showAddPollutionConcernDialog() {
-    // Dismiss keyboard and unfocus location fields so only the dialog shows (no search/autocomplete)
     FocusScope.of(context).unfocus();
     FocusManager.instance.primaryFocus?.unfocus();
-    debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'entry',
-        hypothesisId: 'H1', data: {'mounted': mounted});
+    debugLog(
+      'map_screen.dart:_showAddPollutionConcernDialog',
+      'entry',
+      hypothesisId: 'H1',
+      data: {'mounted': mounted},
+    );
     final listToShow = availablePollutants.isEmpty
         ? _defaultPollutantList
         : availablePollutants;
     final selectedInDialog = Set<String>.from(selectedPollutants);
-    debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'before showDialog',
-        hypothesisId: 'H2', data: {'listLength': listToShow.length});
+    debugLog(
+      'map_screen.dart:_showAddPollutionConcernDialog',
+      'before showDialog',
+      hypothesisId: 'H2',
+      data: {'listLength': listToShow.length},
+    );
     try {
       showDialog<void>(
         context: context,
         useRootNavigator: true,
         builder: (ctx) {
-          debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'builder called',
-              hypothesisId: 'H3', data: {});
+          debugLog(
+            'map_screen.dart:_showAddPollutionConcernDialog',
+            'builder called',
+            hypothesisId: 'H3',
+            data: {},
+          );
           return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: 'Back',
-                  ),
-                  const SizedBox(width: 8),
-                  const Flexible(
-                    child: Text(
-                      "Your concern about pollution",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                title: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      icon: const Icon(Icons.arrow_back),
+                      tooltip: 'Back',
                     ),
-                  ),
-                ],
-              ),
-              content: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 280, minHeight: 320),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        "Select pollutants to add as concerns (they will receive heavy weight).",
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    const Flexible(
+                      child: Text(
+                        "Your concern about pollution",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: listToShow.map((pollutant) {
-                          final isSelected = selectedInDialog.contains(pollutant);
-                          return SizedBox(
-                            width: 80,
-                            height: 40,
-                            child: InkWell(
-                              onTap: () {
-                                setDialogState(() {
-                                  if (isSelected) {
-                                    selectedInDialog.remove(pollutant);
-                                  } else {
-                                    selectedInDialog.add(pollutant);
-                                  }
-                                });
-                              },
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? _kMainTeal.withOpacity(0.25)
-                                      : Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
+                    ),
+                  ],
+                ),
+                content: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: 280,
+                    minHeight: 320,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          "Select pollutants to add as concerns (they will receive heavy weight).",
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: listToShow.map((pollutant) {
+                            final isSelected = selectedInDialog.contains(
+                              pollutant,
+                            );
+                            return SizedBox(
+                              width: 80,
+                              height: 40,
+                              child: InkWell(
+                                onTap: () {
+                                  setDialogState(() {
+                                    if (isSelected) {
+                                      selectedInDialog.remove(pollutant);
+                                    } else {
+                                      selectedInDialog.add(pollutant);
+                                    }
+                                  });
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  decoration: BoxDecoration(
                                     color: isSelected
-                                        ? _kMainTeal
-                                        : Colors.grey.shade300,
-                                    width: isSelected ? 2 : 1,
+                                        ? _kMainTeal.withOpacity(0.25)
+                                        : Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? _kMainTeal
+                                          : Colors.grey.shade300,
+                                      width: isSelected ? 2 : 1,
+                                    ),
                                   ),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  pollutant,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight:
-                                        isSelected ? FontWeight.bold : FontWeight.normal,
-                                    color: isSelected
-                                        ? _kMainTeal
-                                        : Colors.grey.shade700,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    pollutant,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: isSelected
+                                          ? _kMainTeal
+                                          : Colors.grey.shade700,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                if (selectedInDialog.isNotEmpty)
-                  TextButton(
-                    onPressed: () {
-                      setDialogState(() {
-                        selectedInDialog.clear();
-                      });
-                    },
-                    child: Text(
-                      "Remove all",
-                      style: TextStyle(color: Colors.grey.shade700),
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     ),
                   ),
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text("Cancel"),
                 ),
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _kMainTeal,
-                    foregroundColor: Colors.white,
+                actions: [
+                  if (selectedInDialog.isNotEmpty)
+                    TextButton(
+                      onPressed: () {
+                        setDialogState(() {
+                          selectedInDialog.clear();
+                        });
+                      },
+                      child: Text(
+                        "Remove all",
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                    ),
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text("Cancel"),
                   ),
-                  onPressed: selectedInDialog.isEmpty
-                      ? null
-                      : () async {
-                          Navigator.of(ctx).pop();
-                          setState(() {
-                            selectedPollutants.clear();
-                            selectedPollutants.addAll(selectedInDialog);
-                            for (final p in selectedInDialog) {
-                              if (!availablePollutants.contains(p)) {
-                                availablePollutants.add(p);
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _kMainTeal,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: selectedInDialog.isEmpty
+                        ? null
+                        : () async {
+                            Navigator.of(ctx).pop();
+                            setState(() {
+                              selectedPollutants.clear();
+                              selectedPollutants.addAll(selectedInDialog);
+                              for (final p in selectedInDialog) {
+                                if (!availablePollutants.contains(p)) {
+                                  availablePollutants.add(p);
+                                }
                               }
-                            }
-                            hasPollutionConcern = true;
-                            loading = true;
-                          });
-                          await _recalculateRoutesWithCurrentPollutants();
-                        },
-                  child: const Text("Add & Recalculate"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+                              hasPollutionConcern = true;
+                              loading = true;
+                            });
+                            await _recalculateRoutesWithCurrentPollutants();
+                          },
+                    child: const Text("Add & Recalculate"),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
     } catch (e, st) {
-      debugLog('map_screen.dart:_showAddPollutionConcernDialog', 'exception',
-          hypothesisId: 'H5', data: {'error': e.toString(), 'stack': st.toString().split('\n').take(3).join(' ')});
+      debugLog(
+        'map_screen.dart:_showAddPollutionConcernDialog',
+        'exception',
+        hypothesisId: 'H5',
+        data: {
+          'error': e.toString(),
+          'stack': st.toString().split('\n').take(3).join(' '),
+        },
+      );
       rethrow;
     }
   }
@@ -758,7 +805,6 @@ class _MapScreenState extends State<MapScreen> {
       _fitMap();
       await _scoreAllRoutes();
     } catch (e) {
-      // Handle errors (network issues, API errors, etc.)
       print("Error fetching routes: $e");
       if (mounted) {
         setState(() {
@@ -770,9 +816,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // BACKEND SCORING ---------------------------------------------------
-  // This function is called after routes are fetched from Google API
-  // It sends routes to backend DSS for scoring with selected pollutants
-
   Future<void> _scoreAllRoutes() async {
     if (routes.isEmpty) {
       if (mounted) setState(() => loading = false);
@@ -791,18 +834,14 @@ class _MapScreenState extends State<MapScreen> {
           durationSeconds: r.durationSec,
         );
       }).toList();
-
-      // Prepare DSS parameters based on user's pollution concern
       List<String>? focusPollutants;
       bool useOntology = false;
 
       if (hasPollutionConcern == true && selectedPollutants.isNotEmpty) {
-        // Convert ontology pollutant names to backend format (e.g., "PM2.5" -> "pm2.5")
         focusPollutants = selectedPollutants
             .map((p) => OntologyService.toBackendFormat(p))
             .toList();
-        useOntology =
-            true; // Enable ontology-based adjustments for better scoring
+        useOntology = true;
       }
       debugLog(
         'map_screen.dart:_scoreAllRoutes',
@@ -817,8 +856,6 @@ class _MapScreenState extends State<MapScreen> {
           'useOntology': useOntology,
         },
       );
-
-      // Call backend API to calculate DSS scores with selected pollutants
       print("Connecting to: $backendBase");
       final scores = await backend.scoreRoutes(
         routes: routeItems,
@@ -833,9 +870,7 @@ class _MapScreenState extends State<MapScreen> {
         'score success',
         runId: 'initial',
         hypothesisId: 'H8',
-        data: {
-          'scoreCount': scores.length,
-        },
+        data: {'scoreCount': scores.length},
       );
 
       _ensureScoreExists();
@@ -843,15 +878,12 @@ class _MapScreenState extends State<MapScreen> {
       _chooseBestRoute();
       _drawRoutesBasic();
     } catch (e) {
-      // Handle errors (network timeout, backend error, etc.)
       print("Error scoring routes: $e");
-      // Still ensure scores exist even if backend call failed
       _ensureScoreExists();
       _computeIndicators();
       _chooseBestRoute();
       _drawRoutesBasic();
     } finally {
-      // Always stop loading, even if there was an error
       if (mounted) setState(() => loading = false);
     }
   }
@@ -882,7 +914,6 @@ class _MapScreenState extends State<MapScreen> {
     for (int i = 0; i < routes.length; i++) {
       final s = routeScores[i]!;
 
-      // Use backend values directly!
       final di = s.di.clamp(0.0, 1.0);
       final dt = s.dt.clamp(0.0, 1.0);
       final dp = s.dp.clamp(0.0, 1.0);
@@ -893,7 +924,6 @@ class _MapScreenState extends State<MapScreen> {
       indicators[i] = RouteIndicators(di: di, dt: dt, dp: dp, dw: dw, si: si);
     }
 
-    // Sort by SI
     final combined = List.generate(
       routes.length,
       (i) => {
@@ -968,8 +998,6 @@ class _MapScreenState extends State<MapScreen> {
     marks.clear();
 
     final safeIndex = chosenRoute.clamp(0, routes.length - 1);
-
-    // Non-selected routes underneath (zIndex 0), selected route on top (zIndex 1)
     for (int i = 0; i < routes.length; i++) {
       if (i == safeIndex) continue;
       final routeIndex = i;
@@ -991,14 +1019,23 @@ class _MapScreenState extends State<MapScreen> {
         ),
       );
     }
-    // Thinner green route during navigation when user is moving
     final selectedPoints = routes[safeIndex].points;
     final routeWidth = step == FlowStep.nav ? 8 : 6;
-    if (step == FlowStep.nav && _navCurrentLocation != null && selectedPoints.length >= 2) {
-      final closestIdx = _closestRoutePointIndex(_navCurrentLocation!, selectedPoints);
+    if (step == FlowStep.nav &&
+        _navCurrentLocation != null &&
+        selectedPoints.length >= 2) {
+      final closestIdx = _closestRoutePointIndex(
+        _navCurrentLocation!,
+        selectedPoints,
+      );
       _lastNavClosestIndex = closestIdx;
-      final traveledPoints = selectedPoints.sublist(0, (closestIdx + 1).clamp(1, selectedPoints.length));
-      final remainingPoints = selectedPoints.sublist(closestIdx.clamp(0, selectedPoints.length - 1));
+      final traveledPoints = selectedPoints.sublist(
+        0,
+        (closestIdx + 1).clamp(1, selectedPoints.length),
+      );
+      final remainingPoints = selectedPoints.sublist(
+        closestIdx.clamp(0, selectedPoints.length - 1),
+      );
       polys.add(
         Polyline(
           polylineId: PolylineId("route${safeIndex}_traveled"),
@@ -1047,7 +1084,6 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
 
-    // During nav/reroute don't show origin pin (avoids red pin); destination only
     if (origin != null && step != FlowStep.nav) {
       marks.add(Marker(markerId: const MarkerId("o"), position: origin!));
     }
@@ -1095,7 +1131,6 @@ class _MapScreenState extends State<MapScreen> {
 
   // SIGN OUT ---------------------------------------------------------
 
-  // Show sign out confirmation dialog
   void _showSignOutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -1161,21 +1196,18 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // Handle sign out
   Future<void> _handleSignOut(BuildContext context) async {
     try {
       print('👋 User signed out');
 
-      // Navigate to welcome (sign-in / sign-up) page
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-          (route) => false, // Remove all previous routes
+          (route) => false,
         );
       }
     } catch (e) {
       print('Error signing out: $e');
-      // Still navigate to welcome page even if there's an error
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const WelcomeScreen()),
@@ -1225,7 +1257,7 @@ class _MapScreenState extends State<MapScreen> {
             Icon(icon, size: 18),
             const SizedBox(width: 6),
             Text(
-              formatDurationShort(sec), // NEW formatting
+              formatDurationShort(sec),
               style: const TextStyle(fontSize: 16),
             ),
           ],
@@ -1245,7 +1277,7 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Smart Route Finder"),
-        automaticallyImplyLeading: false, // Remove back arrow icon
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -1282,7 +1314,6 @@ class _MapScreenState extends State<MapScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Minimize button row
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -1298,223 +1329,269 @@ class _MapScreenState extends State<MapScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.keyboard_arrow_down),
                                   tooltip: "Minimize",
-                                  onPressed: () => setState(() => _routePanelExpanded = false),
+                                  onPressed: () => setState(
+                                    () => _routePanelExpanded = false,
+                                  ),
                                   color: _kMainTeal,
                                 ),
                               ],
                             ),
                             SearchBox(
-                      key: const ValueKey<String>('origin'),
-                      controller: startCtrl,
-                      hint: "Your Location",
-                      isOrigin: true,
-                      focusNode: focusOrigin,
-                      googleApiKey: googleApiKey,
-                      onClear: () {
-                        setState(() {
-                          startCtrl.clear();
-                          origin = null;
-                          hasPollutionConcern = null;
-                          selectedPollutants.clear();
-                          routes.clear();
-                          indicators.clear();
-                          routeScores.clear();
-                          polys.clear();
-                          marks.clear();
-                        });
-                      },
-                      onMyLocation: (loc) async {
-                        if (origin != loc) {
-                          hasPollutionConcern = null;
-                          selectedPollutants.clear();
-                        }
-                        origin = loc;
-                        startCtrl.text = "My Location";
-                        await _onEndpointsUpdated();
-                      },
-                      onPredictionSelected: (p) async {
-                        final ll = await geocoder.geocode(p.description ?? "");
-                        if (ll != null) {
-                          if (origin != ll) {
-                            hasPollutionConcern = null;
-                            selectedPollutants.clear();
-                          }
-                          origin = ll;
-                          startCtrl.text = p.description ?? "";
-                          debouncer.run(() => _onEndpointsUpdated());
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    SearchBox(
-                      key: const ValueKey<String>('destination'),
-                      controller: endCtrl,
-                      hint: "Destination",
-                      isOrigin: false,
-                      focusNode: focusDest,
-                      googleApiKey: googleApiKey,
-                      onClear: () {
-                        setState(() {
-                          endCtrl.clear();
-                          dest = null;
-                          hasPollutionConcern = null;
-                          selectedPollutants.clear();
-                          routes.clear();
-                          indicators.clear();
-                          routeScores.clear();
-                          polys.clear();
-                          marks.clear();
-                        });
-                      },
-                      onMyLocation: (loc) async {
-                        if (dest != loc) {
-                          hasPollutionConcern = null;
-                          selectedPollutants.clear();
-                        }
-                        dest = loc;
-                        endCtrl.text = "My Location";
-                        await _onEndpointsUpdated();
-                      },
-                      onPredictionSelected: (p) async {
-                        final ll = await geocoder.geocode(p.description ?? "");
-                        if (ll != null) {
-                          if (dest != ll) {
-                            hasPollutionConcern = null;
-                            selectedPollutants.clear();
-                          }
-                          dest = ll;
-                          endCtrl.text = p.description ?? "";
-                          debouncer.run(() => _onEndpointsUpdated());
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    if (step == FlowStep.choose && routes.isNotEmpty)
-                      (indicators.length == routes.length)
-                          ? Container(
-                              margin: const EdgeInsets.only(top: 10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: loading
-                                        ? null
-                                        : _showAddPollutionConcernDialog,
-                                    icon: const Icon(Icons.add_circle_outline, size: 20),
-                                    label: const Text("Add pollution concern"),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.orange.shade700,
-                                      side: BorderSide(color: Colors.orange.shade300),
-                                    ),
-                                  ),
-                                  if (selectedPollutants.isNotEmpty) ...[
-                                    const SizedBox(height: 8),
-                                    OutlinedButton.icon(
-                                      onPressed: loading
-                                          ? null
-                                          : () async {
-                                              setState(() {
-                                                selectedPollutants.clear();
-                                                hasPollutionConcern = false;
-                                                loading = true;
-                                              });
-                                              await _recalculateRoutesWithCurrentPollutants();
-                                            },
-                                      icon: const Icon(Icons.remove_circle_outline, size: 20),
-                                      label: const Text("Remove pollution concern"),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.red.shade700,
-                                        side: BorderSide(color: Colors.red.shade300),
-                                      ),
-                                    ),
-                                  ],
-                                  const SizedBox(height: 12),
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxHeight: MediaQuery.of(context).size.height * 0.45,
-                                    ),
-                                    child: SingleChildScrollView(
-                                      child: RouteList(
-                                        routes: routes,
-                                        chosenRoute: safeIndex,
-                                        indicators: indicators,
-                                        selectedPollutants: selectedPollutants,
-                                        onSelect: (i) {
-                                          // "View more details" -> Detail page
-                                          chosenRoute = i.clamp(0, routes.length - 1);
-                                          step = FlowStep.detail;
-                                          _drawRoutesBasic();
-                                          setState(() {});
-                                        },
-                                        onPreview: (i) {
-                                          // Chevron arrow -> Preview page
-                                          chosenRoute = i.clamp(0, routes.length - 1);
-                                          step = FlowStep.preview;
-                                          _drawRoutesBasic();
-                                          setState(() {});
-                                        },
-                                        modeSelector: _buildModeSelector(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.all(8),
-                              child: CircularProgressIndicator(),
+                              key: const ValueKey<String>('origin'),
+                              controller: startCtrl,
+                              hint: "Your Location",
+                              isOrigin: true,
+                              focusNode: focusOrigin,
+                              googleApiKey: googleApiKey,
+                              onClear: () {
+                                setState(() {
+                                  startCtrl.clear();
+                                  origin = null;
+                                  hasPollutionConcern = null;
+                                  selectedPollutants.clear();
+                                  routes.clear();
+                                  indicators.clear();
+                                  routeScores.clear();
+                                  polys.clear();
+                                  marks.clear();
+                                });
+                              },
+                              onMyLocation: (loc) async {
+                                if (origin != loc) {
+                                  hasPollutionConcern = null;
+                                  selectedPollutants.clear();
+                                }
+                                origin = loc;
+                                startCtrl.text = "My Location";
+                                await _onEndpointsUpdated();
+                              },
+                              onPredictionSelected: (p) async {
+                                final ll = await geocoder.geocode(
+                                  p.description ?? "",
+                                );
+                                if (ll != null) {
+                                  if (origin != ll) {
+                                    hasPollutionConcern = null;
+                                    selectedPollutants.clear();
+                                  }
+                                  origin = ll;
+                                  startCtrl.text = p.description ?? "";
+                                  debouncer.run(() => _onEndpointsUpdated());
+                                }
+                              },
                             ),
 
-                    if (step == FlowStep.detail &&
-                        routes.isNotEmpty &&
-                        indicators.containsKey(safeIndex))
-                      DetailCard(
-                        route: routes[safeIndex],
-                        ind: indicators[safeIndex]!,
-                        score: routeScores[safeIndex],
-                        modeSelector: _buildModeSelector(),
-                        originLabel: startCtrl.text,
-                        destinationLabel: endCtrl.text,
-                        selectedPollutants: selectedPollutants,
-                        onBack: () => setState(() => step = FlowStep.choose),
-                        onNext: () =>
-                            setState(() => step = FlowStep.dssCalculation),
-                        onStartRoute: () => _startNavigation(),
-                        onAddPollutionConcern: _showAddPollutionConcernDialog,
-                      ),
+                            const SizedBox(height: 8),
 
-                    if (step == FlowStep.dssCalculation &&
-                        routes.isNotEmpty &&
-                        routeScores.containsKey(safeIndex))
-                      Positioned.fill(
-                        child: DSSCalculationScreen(
-                          route: routes[safeIndex],
-                          score: routeScores[safeIndex],
-                          originLabel: startCtrl.text,
-                          destinationLabel: endCtrl.text,
-                          selectedPollutants: selectedPollutants,
-                          modeSelector: _buildModeSelector(),
-                          onBack: () => setState(() => step = FlowStep.detail),
-                          onNext: () => setState(() => step = FlowStep.preview),
-                          onAddPollutionConcern: _showAddPollutionConcernDialog,
-                        ),
-                      ),
+                            SearchBox(
+                              key: const ValueKey<String>('destination'),
+                              controller: endCtrl,
+                              hint: "Destination",
+                              isOrigin: false,
+                              focusNode: focusDest,
+                              googleApiKey: googleApiKey,
+                              onClear: () {
+                                setState(() {
+                                  endCtrl.clear();
+                                  dest = null;
+                                  hasPollutionConcern = null;
+                                  selectedPollutants.clear();
+                                  routes.clear();
+                                  indicators.clear();
+                                  routeScores.clear();
+                                  polys.clear();
+                                  marks.clear();
+                                });
+                              },
+                              onMyLocation: (loc) async {
+                                if (dest != loc) {
+                                  hasPollutionConcern = null;
+                                  selectedPollutants.clear();
+                                }
+                                dest = loc;
+                                endCtrl.text = "My Location";
+                                await _onEndpointsUpdated();
+                              },
+                              onPredictionSelected: (p) async {
+                                final ll = await geocoder.geocode(
+                                  p.description ?? "",
+                                );
+                                if (ll != null) {
+                                  if (dest != ll) {
+                                    hasPollutionConcern = null;
+                                    selectedPollutants.clear();
+                                  }
+                                  dest = ll;
+                                  endCtrl.text = p.description ?? "";
+                                  debouncer.run(() => _onEndpointsUpdated());
+                                }
+                              },
+                            ),
 
-                    if (step == FlowStep.preview)
-                      PreviewCard(
-                        onBack: () =>
-                            setState(() => step = FlowStep.dssCalculation),
-                        onNext: () => _startNavigation(),
-                      ),
+                            const SizedBox(height: 10),
+
+                            if (step == FlowStep.choose && routes.isNotEmpty)
+                              (indicators.length == routes.length)
+                                  ? Container(
+                                      margin: const EdgeInsets.only(top: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          OutlinedButton.icon(
+                                            onPressed: loading
+                                                ? null
+                                                : _showAddPollutionConcernDialog,
+                                            icon: const Icon(
+                                              Icons.add_circle_outline,
+                                              size: 20,
+                                            ),
+                                            label: const Text(
+                                              "Add pollution concern",
+                                            ),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor:
+                                                  Colors.orange.shade700,
+                                              side: BorderSide(
+                                                color: Colors.orange.shade300,
+                                              ),
+                                            ),
+                                          ),
+                                          if (selectedPollutants
+                                              .isNotEmpty) ...[
+                                            const SizedBox(height: 8),
+                                            OutlinedButton.icon(
+                                              onPressed: loading
+                                                  ? null
+                                                  : () async {
+                                                      setState(() {
+                                                        selectedPollutants
+                                                            .clear();
+                                                        hasPollutionConcern =
+                                                            false;
+                                                        loading = true;
+                                                      });
+                                                      await _recalculateRoutesWithCurrentPollutants();
+                                                    },
+                                              icon: const Icon(
+                                                Icons.remove_circle_outline,
+                                                size: 20,
+                                              ),
+                                              label: const Text(
+                                                "Remove pollution concern",
+                                              ),
+                                              style: OutlinedButton.styleFrom(
+                                                foregroundColor:
+                                                    Colors.red.shade700,
+                                                side: BorderSide(
+                                                  color: Colors.red.shade300,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          const SizedBox(height: 12),
+                                          ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxHeight:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.height *
+                                                  0.45,
+                                            ),
+                                            child: SingleChildScrollView(
+                                              child: RouteList(
+                                                routes: routes,
+                                                chosenRoute: safeIndex,
+                                                indicators: indicators,
+                                                selectedPollutants:
+                                                    selectedPollutants,
+                                                onSelect: (i) {
+                                                  chosenRoute = i.clamp(
+                                                    0,
+                                                    routes.length - 1,
+                                                  );
+                                                  step = FlowStep.detail;
+                                                  _drawRoutesBasic();
+                                                  setState(() {});
+                                                },
+                                                onPreview: (i) {
+                                                  chosenRoute = i.clamp(
+                                                    0,
+                                                    routes.length - 1,
+                                                  );
+                                                  step = FlowStep.preview;
+                                                  _drawRoutesBasic();
+                                                  setState(() {});
+                                                },
+                                                modeSelector:
+                                                    _buildModeSelector(),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : const Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: CircularProgressIndicator(),
+                                    ),
+
+                            if (step == FlowStep.detail &&
+                                routes.isNotEmpty &&
+                                indicators.containsKey(safeIndex))
+                              DetailCard(
+                                route: routes[safeIndex],
+                                ind: indicators[safeIndex]!,
+                                score: routeScores[safeIndex],
+                                modeSelector: _buildModeSelector(),
+                                originLabel: startCtrl.text,
+                                destinationLabel: endCtrl.text,
+                                selectedPollutants: selectedPollutants,
+                                onBack: () =>
+                                    setState(() => step = FlowStep.choose),
+                                onNext: () => setState(
+                                  () => step = FlowStep.dssCalculation,
+                                ),
+                                onStartRoute: () => _startNavigation(),
+                                onAddPollutionConcern:
+                                    _showAddPollutionConcernDialog,
+                              ),
+
+                            if (step == FlowStep.dssCalculation &&
+                                routes.isNotEmpty &&
+                                routeScores.containsKey(safeIndex))
+                              Positioned.fill(
+                                child: DSSCalculationScreen(
+                                  route: routes[safeIndex],
+                                  score: routeScores[safeIndex],
+                                  originLabel: startCtrl.text,
+                                  destinationLabel: endCtrl.text,
+                                  selectedPollutants: selectedPollutants,
+                                  modeSelector: _buildModeSelector(),
+                                  onBack: () =>
+                                      setState(() => step = FlowStep.detail),
+                                  onNext: () =>
+                                      setState(() => step = FlowStep.preview),
+                                  onAddPollutionConcern:
+                                      _showAddPollutionConcernDialog,
+                                ),
+                              ),
+
+                            if (step == FlowStep.preview)
+                              PreviewCard(
+                                onBack: () => setState(
+                                  () => step = FlowStep.dssCalculation,
+                                ),
+                                onNext: () => _startNavigation(),
+                              ),
                           ],
                         ),
                       )
                     : Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1535,7 +1612,9 @@ class _MapScreenState extends State<MapScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.keyboard_arrow_up),
                                   tooltip: "Maximize",
-                                  onPressed: () => setState(() => _routePanelExpanded = true),
+                                  onPressed: () => setState(
+                                    () => _routePanelExpanded = true,
+                                  ),
                                   color: _kMainTeal,
                                 ),
                               ],
@@ -1584,7 +1663,9 @@ class _MapScreenState extends State<MapScreen> {
               onRouteOptionsTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text("Route options – recalculating from current location."),
+                    content: Text(
+                      "Route options – recalculating from current location.",
+                    ),
                   ),
                 );
                 _recalculateRouteFromCurrentLocation();
@@ -1611,7 +1692,6 @@ class _MapScreenState extends State<MapScreen> {
 
           if (loading) const Center(child: CircularProgressIndicator()),
 
-          // Pollution Concern Dialog
           if (showPollutionDialog)
             Container(
               color: Colors.black54,
@@ -1686,7 +1766,6 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
 
-          // Pollutant Selection Dialog
           if (showPollutantSelection)
             Container(
               color: Colors.black54,
@@ -1741,10 +1820,11 @@ class _MapScreenState extends State<MapScreen> {
                                   mainAxisSpacing: 12,
                                   childAspectRatio: 2.5,
                                 ),
-                            itemCount: (availablePollutants.isEmpty
-                                    ? _defaultPollutantList
-                                    : availablePollutants)
-                                .length,
+                            itemCount:
+                                (availablePollutants.isEmpty
+                                        ? _defaultPollutantList
+                                        : availablePollutants)
+                                    .length,
                             itemBuilder: (context, index) {
                               final listToShow = availablePollutants.isEmpty
                                   ? _defaultPollutantList
@@ -1769,11 +1849,11 @@ class _MapScreenState extends State<MapScreen> {
                                     color: isSelected
                                         ? _kMainTeal.withOpacity(0.25)
                                         : Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? _kMainTeal
-                                            : Colors.grey.shade300,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? _kMainTeal
+                                          : Colors.grey.shade300,
                                       width: isSelected ? 2 : 1,
                                     ),
                                   ),

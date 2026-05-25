@@ -20,7 +20,6 @@ class WelcomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            // Decorative wave pattern at top
             Positioned(
               top: 0,
               left: 0,
@@ -30,7 +29,6 @@ class WelcomeScreen extends StatelessWidget {
                 painter: WavePainter(),
               ),
             ),
-            // Main content – scrollable so it fits any screen height
             SingleChildScrollView(
               padding: EdgeInsets.only(
                 top: (size.height * 0.08).clamp(40.0, 80.0) + padding.top,
@@ -39,7 +37,9 @@ class WelcomeScreen extends StatelessWidget {
                 bottom: 24 + padding.bottom,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: size.height - padding.top - padding.bottom - 100),
+                constraints: BoxConstraints(
+                  minHeight: size.height - padding.top - padding.bottom - 100,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -138,7 +138,6 @@ class WelcomeScreen extends StatelessWidget {
   }
 }
 
-// Custom painter for wave pattern
 class WavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -148,23 +147,25 @@ class WavePainter extends CustomPainter {
 
     final path = Path();
     path.moveTo(0, size.height * 0.6);
-    
-    // Create wave pattern
+
     path.quadraticBezierTo(
-      size.width * 0.25, size.height * 0.4,
-      size.width * 0.5, size.height * 0.6,
+      size.width * 0.25,
+      size.height * 0.4,
+      size.width * 0.5,
+      size.height * 0.6,
     );
     path.quadraticBezierTo(
-      size.width * 0.75, size.height * 0.8,
-      size.width, size.height * 0.6,
+      size.width * 0.75,
+      size.height * 0.8,
+      size.width,
+      size.height * 0.6,
     );
     path.lineTo(size.width, 0);
     path.lineTo(0, 0);
     path.close();
 
     canvas.drawPath(path, paint);
-    
-    // Second wave layer
+
     final paint2 = Paint()
       ..color = const Color(0xFF26A69A)
       ..style = PaintingStyle.fill;
@@ -172,12 +173,16 @@ class WavePainter extends CustomPainter {
     final path2 = Path();
     path2.moveTo(0, size.height * 0.7);
     path2.quadraticBezierTo(
-      size.width * 0.3, size.height * 0.5,
-      size.width * 0.6, size.height * 0.7,
+      size.width * 0.3,
+      size.height * 0.5,
+      size.width * 0.6,
+      size.height * 0.7,
     );
     path2.quadraticBezierTo(
-      size.width * 0.9, size.height * 0.9,
-      size.width, size.height * 0.7,
+      size.width * 0.9,
+      size.height * 0.9,
+      size.width,
+      size.height * 0.7,
     );
     path2.lineTo(size.width, 0);
     path2.lineTo(0, 0);

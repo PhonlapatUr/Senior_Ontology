@@ -36,17 +36,19 @@ class NavOverlay extends StatelessWidget {
     final remainingMeters = currentLocation != null
         ? distanceRemainingAlongRoute(currentLocation!, route.points)
         : route.distanceMeters.toDouble();
-    final totalMeters = route.distanceMeters > 0 ? route.distanceMeters.toDouble() : 1.0;
-    final durationRemainingSec = (remainingMeters / totalMeters * route.durationSec).round();
-    // Instruction updates as user moves: direction toward next part of route (not just destination)
+    final totalMeters = route.distanceMeters > 0
+        ? route.distanceMeters.toDouble()
+        : 1.0;
+    final durationRemainingSec =
+        (remainingMeters / totalMeters * route.durationSec).round();
     final instruction = (currentLocation != null && route.points.isNotEmpty)
         ? directionToNextOnRoute(currentLocation!, route.points, 80)
         : (route.points.isNotEmpty
-            ? directionTo(
-                currentLocation ?? route.points.first,
-                route.points.last,
-              )
-            : "Follow the route");
+              ? directionTo(
+                  currentLocation ?? route.points.first,
+                  route.points.last,
+                )
+              : "Follow the route");
     final eta = DateTime.now().add(Duration(seconds: durationRemainingSec));
     debugLog(
       'nav_overlay.dart:build',
@@ -70,7 +72,6 @@ class NavOverlay extends StatelessWidget {
 
     return Stack(
       children: [
-        // TOP-LEFT: Instruction box (↑ toward ...) – responsive
         Positioned(
           top: padding.top + 12,
           left: horizontalInset,
@@ -123,7 +124,6 @@ class NavOverlay extends StatelessWidget {
           ),
         ),
 
-        // RIGHT: Map controls – responsive inset
         Positioned(
           top: padding.top + 94,
           right: horizontalInset,
@@ -138,7 +138,8 @@ class NavOverlay extends StatelessWidget {
               if (onZoomIn != null) const SizedBox(height: 4),
               if (onZoomOut != null)
                 _MapControlButton(icon: Icons.remove, onTap: onZoomOut!),
-              if (onZoomOut != null && onRouteOptionsTap != null) const SizedBox(height: 8),
+              if (onZoomOut != null && onRouteOptionsTap != null)
+                const SizedBox(height: 8),
               if (onRouteOptionsTap != null)
                 _MapControlButton(
                   icon: Icons.alt_route,
@@ -147,8 +148,6 @@ class NavOverlay extends StatelessWidget {
             ],
           ),
         ),
-
-        // BOTTOM: Dark bar – time (green + clock + leaf), distance, ETA, route options, Exit, Re-center
         Positioned(
           left: 0,
           right: 0,
@@ -162,7 +161,9 @@ class NavOverlay extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.82),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(14),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.3),
@@ -175,7 +176,6 @@ class NavOverlay extends StatelessWidget {
               top: false,
               child: Row(
                 children: [
-                  // Left: time (green), distance & ETA – responsive font size
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +222,6 @@ class NavOverlay extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Exit button (red)
                   Material(
                     color: Colors.red.shade600,
                     borderRadius: BorderRadius.circular(10),
@@ -230,7 +229,10 @@ class NavOverlay extends StatelessWidget {
                       onTap: onExit,
                       borderRadius: BorderRadius.circular(10),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         child: Text(
                           "Exit",
                           style: TextStyle(
@@ -243,7 +245,6 @@ class NavOverlay extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Re-center: triangle + "Re-center"
                   if (onRecenter != null)
                     Material(
                       color: Colors.grey.shade800,
@@ -252,14 +253,27 @@ class NavOverlay extends StatelessWidget {
                         onTap: onRecenter,
                         borderRadius: BorderRadius.circular(10),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.arrow_upward, color: Colors.white, size: 20),
+                              const Icon(
+                                Icons.arrow_upward,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                               const SizedBox(width: 6),
-                              const Text("Re-center",
-                                  style: TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500)),
+                              const Text(
+                                "Re-center",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -280,7 +294,11 @@ class _MapControlButton extends StatelessWidget {
   final VoidCallback onTap;
   final Color? iconColor;
 
-  const _MapControlButton({required this.icon, required this.onTap, this.iconColor});
+  const _MapControlButton({
+    required this.icon,
+    required this.onTap,
+    this.iconColor,
+  });
 
   @override
   Widget build(BuildContext context) {

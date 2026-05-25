@@ -22,29 +22,26 @@ class RouteList extends StatelessWidget {
     required this.modeSelector,
     this.selectedPollutants = const {},
   });
-  /// Get color for travel time based on DSS-calculated SI score ranking
-  /// SI (Safety Index) comes from backend DSS calculation (riskScore)
-  /// Green = lowest DSS score (safest), Yellow = second lowest, Red = highest DSS score (unsafe)
-  /// Routes with the same DSS score get the same color
   Color _getTimeColor(double si, int index, int totalRoutes) {
     if (totalRoutes == 1) return Colors.green;
-    
+
     final allDssScores = indicators.values.map((e) => e.si).toList();
-    
-    final uniqueScores = allDssScores.toSet().toList()..sort((a, b) => a.compareTo(b));
-    
+
+    final uniqueScores = allDssScores.toSet().toList()
+      ..sort((a, b) => a.compareTo(b));
+
     if (uniqueScores.isEmpty) return Colors.grey;
-    
+
     final rank = uniqueScores.indexOf(si);
-    
+
     if (rank == -1) return Colors.grey;
-    
+
     if (uniqueScores.length == 1) return Colors.green;
-    
+
     if (uniqueScores.length == 2) {
       return rank == 0 ? Colors.green : const Color(0xFFF9A825);
     }
-    
+
     if (rank == 0) {
       return Colors.green;
     } else if (rank == uniqueScores.length - 1) {
@@ -54,12 +51,11 @@ class RouteList extends StatelessWidget {
     }
   }
 
-  /// Format pollution avoidance text from selectedPollutants
   String _getPollutionAvoidanceText() {
     if (selectedPollutants.isEmpty) return "";
-    
+
     final pollutants = selectedPollutants.toList()..sort();
-    
+
     if (pollutants.length == 1) {
       return "Avoid ${pollutants[0]}";
     } else if (pollutants.length == 2) {
@@ -86,33 +82,38 @@ class RouteList extends StatelessWidget {
           final si = ind.si.clamp(0.0, 1.0);
 
           final arrivalTime = formatArrivalTime(
-            DateTime.now().add(Duration(seconds: r.durationSec))
+            DateTime.now().add(Duration(seconds: r.durationSec)),
           );
 
           final timeColor = _getTimeColor(si, i, routes.length);
-          
+
           final pollutionText = _getPollutionAvoidanceText();
-          
+
           final distance = formatDistanceShort(r.distanceMeters);
-          
+
           final duration = formatDurationShort(r.durationSec);
 
           final isLast = i == routes.length - 1;
-          
+
           return Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: () => onSelect(i),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: isLast ? null : Border(
-                    bottom: BorderSide(
-                      color: Colors.grey.shade200,
-                      width: 1,
-                    ),
-                  ),
+                  border: isLast
+                      ? null
+                      : Border(
+                          bottom: BorderSide(
+                            color: Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

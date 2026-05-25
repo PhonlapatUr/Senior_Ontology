@@ -78,10 +78,12 @@ class _SearchBoxState extends State<SearchBox> {
       final myLocationButton = IconButton(
         icon: const Icon(Icons.my_location, color: Color(0xFF26A69A)),
         onPressed: () {
-          debugLog('search_box.dart:MyLocation', 'My Location pressed',
-              hypothesisId: 'H1', data: {'isOrigin': true});
-          // Unfocus first so the patched google_places_flutter removes the suggestions overlay
-          // on focus loss; then set "My Location" and resolve location.
+          debugLog(
+            'search_box.dart:MyLocation',
+            'My Location pressed',
+            hypothesisId: 'H1',
+            data: {'isOrigin': true},
+          );
           widget.focusNode?.unfocus();
           FocusScope.of(context).unfocus();
           FocusManager.instance.primaryFocus?.unfocus();
@@ -110,7 +112,7 @@ class _SearchBoxState extends State<SearchBox> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5), // light grey primary
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -130,7 +132,7 @@ class _SearchBoxState extends State<SearchBox> {
           hintStyle: const TextStyle(color: Color(0xFF616161)),
           prefixIcon: Icon(
             widget.isOrigin ? Icons.my_location : Icons.place,
-            color: const Color(0xFF26A69A), // main teal
+            color: const Color(0xFF26A69A),
           ),
           suffixIcon: _buildSuffixIcon(),
           filled: true,
@@ -141,7 +143,8 @@ class _SearchBoxState extends State<SearchBox> {
           ),
         ),
         isLatLngRequired: true,
-        getPlaceDetailWithLatLng: (Prediction p) => widget.onPredictionSelected(p),
+        getPlaceDetailWithLatLng: (Prediction p) =>
+            widget.onPredictionSelected(p),
         itemClick: (Prediction p) {
           widget.controller.text = p.description ?? "";
           widget.controller.selection = TextSelection.fromPosition(

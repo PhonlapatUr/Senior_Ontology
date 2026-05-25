@@ -54,13 +54,13 @@ String formatArrivalTime(DateTime dt) {
   int hour = dt.hour;
   int minute = dt.minute;
   String period = hour >= 12 ? "P.M." : "A.M.";
-  
+
   if (hour == 0) {
     hour = 12;
   } else if (hour > 12) {
     hour = hour - 12;
   }
-  
+
   return "$hour:${minute.toString().padLeft(2, '0')} $period";
 }
 
@@ -71,12 +71,12 @@ String formatDistanceShort(int meters) {
   return "${(meters / 1000).toStringAsFixed(1)} km";
 }
 
-/// Haversine distance in meters between two LatLng points.
 double _haversineMeters(double lat1, double lng1, double lat2, double lng2) {
-  const double R = 6371000; // Earth radius in meters
+  const double R = 6371000;
   final dLat = _toRad(lat2 - lat1);
   final dLng = _toRad(lng2 - lng1);
-  final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+  final a =
+      math.sin(dLat / 2) * math.sin(dLat / 2) +
       math.cos(_toRad(lat1)) *
           math.cos(_toRad(lat2)) *
           math.sin(dLng / 2) *
@@ -86,10 +86,6 @@ double _haversineMeters(double lat1, double lng1, double lat2, double lng2) {
 }
 
 double _toRad(double deg) => deg * math.pi / 180;
-
-/// Returns remaining distance (meters) and segment index on the route from
-/// [current] to destination along [routePoints].
-/// [routePoints] must not be empty.
 double distanceRemainingAlongRoute(LatLng current, List<LatLng> routePoints) {
   if (routePoints.isEmpty) return 0;
   if (routePoints.length == 1) {
@@ -129,8 +125,6 @@ double distanceRemainingAlongRoute(LatLng current, List<LatLng> routePoints) {
   return remaining;
 }
 
-/// Minimum distance in meters from [point] to the route polyline (vertices only).
-/// Used to detect when the user has gone off-route.
 double distanceToRoute(LatLng point, List<LatLng> routePoints) {
   if (routePoints.isEmpty) return double.infinity;
   double minDist = double.infinity;
@@ -146,17 +140,21 @@ double distanceToRoute(LatLng point, List<LatLng> routePoints) {
   return minDist;
 }
 
-/// Direction toward a point ahead on the route so the instruction updates as the user moves.
-/// [metersAhead] is how far along the route to look for the "next" target (default 80m).
-String directionToNextOnRoute(LatLng current, List<LatLng> routePoints, [double metersAhead = 80]) {
+String directionToNextOnRoute(
+  LatLng current,
+  List<LatLng> routePoints, [
+  double metersAhead = 80,
+]) {
   if (routePoints.isEmpty) return "Follow the route";
   if (routePoints.length == 1) return directionTo(current, routePoints.first);
   double minDist = double.infinity;
   int closestIdx = 0;
   for (int i = 0; i < routePoints.length; i++) {
     final d = _haversineMeters(
-      current.latitude, current.longitude,
-      routePoints[i].latitude, routePoints[i].longitude,
+      current.latitude,
+      current.longitude,
+      routePoints[i].latitude,
+      routePoints[i].longitude,
     );
     if (d < minDist) {
       minDist = d;
@@ -167,8 +165,10 @@ String directionToNextOnRoute(LatLng current, List<LatLng> routePoints, [double 
   int idx = closestIdx;
   while (idx < routePoints.length - 1 && dist < metersAhead) {
     dist += _haversineMeters(
-      routePoints[idx].latitude, routePoints[idx].longitude,
-      routePoints[idx + 1].latitude, routePoints[idx + 1].longitude,
+      routePoints[idx].latitude,
+      routePoints[idx].longitude,
+      routePoints[idx + 1].latitude,
+      routePoints[idx + 1].longitude,
     );
     idx++;
   }
@@ -176,7 +176,6 @@ String directionToNextOnRoute(LatLng current, List<LatLng> routePoints, [double 
   return directionTo(current, target);
 }
 
-/// Rough cardinal direction from [from] to [to] (e.g. "Head northeast").
 String directionTo(LatLng from, LatLng to) {
   final latDiff = to.latitude - from.latitude;
   final lngDiff = to.longitude - from.longitude;

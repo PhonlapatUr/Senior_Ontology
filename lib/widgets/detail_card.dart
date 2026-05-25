@@ -35,20 +35,17 @@ class DetailCard extends StatelessWidget {
     required this.onStartRoute,
     this.onAddPollutionConcern,
   });
-
-  // Calculate CRITIC point from pollution score
   double _calculateCriticPoint() {
     if (score == null) return 0.0;
     return (1.0 - score!.dp).clamp(0.0, 1.0);
   }
 
-  // Get equation weights based on available data
   String _getEquation() {
     if (score == null) return "0.30 * Di + 0.30 * Dt + 0.30 * Dp + 0.10 * Dw";
-    
+
     bool hasPollution = score!.dp != 0.5;
     bool hasWeather = score!.weatherValid;
-    
+
     if (!hasPollution && !hasWeather) {
       return "0.50 * Di + 0.50 * Dt";
     } else if (hasWeather && !hasPollution) {
@@ -60,13 +57,12 @@ class DetailCard extends StatelessWidget {
     }
   }
 
-  // Get equation calculation with actual values
   String _getEquationCalculation() {
     if (score == null) return "";
-    
+
     bool hasPollution = score!.dp != 0.5;
     bool hasWeather = score!.weatherValid;
-    
+
     if (!hasPollution && !hasWeather) {
       return "Final Score = (0.50 * ${score!.di.toStringAsFixed(3)}) + (0.50 * ${score!.dt.toStringAsFixed(3)})";
     } else if (hasWeather && !hasPollution) {
@@ -78,13 +74,12 @@ class DetailCard extends StatelessWidget {
     }
   }
 
-  // Get final score calculation result
   double _getFinalScore() {
     if (score == null) return 0.0;
-    
+
     bool hasPollution = score!.dp != 0.5;
     bool hasWeather = score!.weatherValid;
-    
+
     if (!hasPollution && !hasWeather) {
       return (0.50 * score!.di) + (0.50 * score!.dt);
     } else if (hasWeather && !hasPollution) {
@@ -92,7 +87,10 @@ class DetailCard extends StatelessWidget {
     } else if (hasPollution && !hasWeather) {
       return (0.30 * score!.di) + (0.30 * score!.dt) + (0.40 * score!.dp);
     } else {
-      return (0.30 * score!.di) + (0.30 * score!.dt) + (0.30 * score!.dp) + (0.10 * score!.dw);
+      return (0.30 * score!.di) +
+          (0.30 * score!.dt) +
+          (0.30 * score!.dp) +
+          (0.10 * score!.dw);
     }
   }
 
@@ -101,8 +99,8 @@ class DetailCard extends StatelessWidget {
       return const Text("No score available.");
     }
 
-    final bool hasPollution = score.dp != 0.5; // server uses dp=0.5 when pollution missing
-    final bool hasWeather = score.weatherValid; // server uses weatherValid for humidity success
+    final bool hasPollution = score.dp != 0.5;
+    final bool hasWeather = score.weatherValid;
 
     return Container(
       width: double.infinity,
@@ -119,11 +117,8 @@ class DetailCard extends StatelessWidget {
         },
         border: TableBorder.all(color: Colors.grey.shade300),
         children: [
-          // Header row
           TableRow(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-            ),
+            decoration: BoxDecoration(color: Colors.grey.shade100),
             children: const [
               Padding(
                 padding: EdgeInsets.all(12),
@@ -151,7 +146,6 @@ class DetailCard extends StatelessWidget {
               ),
             ],
           ),
-          // Data rows
           _buildTableRow("Di: Distance", score.di, true),
           _buildTableRow("Dt: Time", score.dt, true),
           _buildTableRow("Dp: Pollution", score.dp, hasPollution),
@@ -188,10 +182,7 @@ class DetailCard extends StatelessWidget {
           child: Text(
             value.toStringAsFixed(3),
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ),
       ],
@@ -247,14 +238,14 @@ class DetailCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 "Start Route",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -271,8 +262,7 @@ class DetailCard extends StatelessWidget {
     final finalScore = _getFinalScore();
     final screenHeight = MediaQuery.of(context).size.height;
     final cardHeight = (screenHeight * 0.56).clamp(380.0, 560.0);
-    
-    // Format selected pollutants
+
     String pollutionText = "None";
     if (selectedPollutants.isNotEmpty) {
       final pollutants = selectedPollutants.toList()..sort();
@@ -292,10 +282,7 @@ class DetailCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Colors.grey.shade50,
-            ],
+            colors: [Colors.white, Colors.grey.shade50],
           ),
         ),
         child: Column(
@@ -306,7 +293,6 @@ class DetailCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Route Details Section
                     modeSelector,
                     const SizedBox(height: 20),
                     Row(
@@ -329,19 +315,29 @@ class DetailCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: _kMainTeal.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _kMainTeal.withOpacity(0.5), width: 1),
+                        border: Border.all(
+                          color: _kMainTeal.withOpacity(0.5),
+                          width: 1,
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.location_on, color: _kMainTeal, size: 20),
+                              Icon(
+                                Icons.location_on,
+                                color: _kMainTeal,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   "Origin: $originLabel",
-                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -349,12 +345,19 @@ class DetailCard extends StatelessWidget {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              Icon(Icons.location_on, color: Colors.red.shade700, size: 20),
+                              Icon(
+                                Icons.location_on,
+                                color: Colors.red.shade700,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   "Destination: $destinationLabel",
-                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -362,12 +365,19 @@ class DetailCard extends StatelessWidget {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              Icon(Icons.access_time, color: Colors.orange.shade700, size: 20),
+                              Icon(
+                                Icons.access_time,
+                                color: Colors.orange.shade700,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 "Estimate time: ${formatDuration(route.durationSec)} "
                                 "(${prettyKm(route.distanceMeters)})",
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
@@ -375,10 +385,11 @@ class DetailCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Decision Support System Calculation Title
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [_kMainTeal, _kMainTeal.withOpacity(0.8)],
@@ -406,18 +417,24 @@ class DetailCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Pollution Concerns
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange.shade200, width: 1),
+                        border: Border.all(
+                          color: Colors.orange.shade200,
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700, size: 24),
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.orange.shade700,
+                            size: 24,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -473,13 +490,15 @@ class DetailCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // CRITIC point
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: _kMainTeal.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _kMainTeal.withOpacity(0.5), width: 1),
+                        border: Border.all(
+                          color: _kMainTeal.withOpacity(0.5),
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -523,7 +542,6 @@ class DetailCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Real-time Factor Scores Table
                     Row(
                       children: [
                         Icon(Icons.table_chart, color: _kMainTeal, size: 24),
@@ -541,21 +559,26 @@ class DetailCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     _buildScoreTable(score),
                     const SizedBox(height: 24),
-
-                    // Equation for Route Evaluation
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: _kMainTeal.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _kMainTeal.withOpacity(0.5), width: 1),
+                        border: Border.all(
+                          color: _kMainTeal.withOpacity(0.5),
+                          width: 1,
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.functions, color: _kMainTeal, size: 24),
+                              Icon(
+                                Icons.functions,
+                                color: _kMainTeal,
+                                size: 24,
+                              ),
                               const SizedBox(width: 8),
                               const Expanded(
                                 child: Text(
@@ -633,13 +656,14 @@ class DetailCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Route Score Section
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.green.shade400, Colors.green.shade600],
+                          colors: [
+                            Colors.green.shade400,
+                            Colors.green.shade600,
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -707,8 +731,14 @@ class DetailCard extends StatelessWidget {
                         OutlinedButton(
                           onPressed: onBack,
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            side: const BorderSide(color: _kMainTeal, width: 1.5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            side: const BorderSide(
+                              color: _kMainTeal,
+                              width: 1.5,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -727,7 +757,10 @@ class DetailCard extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _kMainTeal,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
