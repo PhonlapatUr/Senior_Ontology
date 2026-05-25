@@ -8,7 +8,7 @@ A Flutter-based mobile application that helps users find the safest and most opt
 
 - Python 3.8+ installed
 - Flutter SDK installed (latest stable version)
-- Android Studio (for Android emulator) or Xcode (for iOS simulator)
+- Android Studio (for Android emulator)
 - Virtual environment `.venv311` in project root
 - Google Maps API key configured in app
 
@@ -29,7 +29,7 @@ uvicorn server:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Backend runs at:
-- `http://127.0.0.1:8000` (desktop/iOS simulator)
+- `http://127.0.0.1:8000` (desktop)
 - `http://10.0.2.2:8000` (Android emulator)
 
 ### 4) Run Flutter App
