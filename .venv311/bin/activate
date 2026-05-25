@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV=/Users/phonlapaturairong/Downloads/Senior_Ontology-main/.venv311
+VIRTUAL_ENV=/Users/phonlapaturairong/Downloads/Senior_Ontology-main-fixing/.venv311
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
