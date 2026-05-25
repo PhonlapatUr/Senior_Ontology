@@ -104,4 +104,3 @@ Run backend tests:
 - Login/signup failed: check backend logs and `Key.json` write permission
 - Map not loading: verify Google Maps API key and internet connection
 
-For more details, see `RUN_GUIDE.md` and `TROUBLESHOOTING.md`.
